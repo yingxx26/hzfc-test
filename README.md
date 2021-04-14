@@ -106,7 +106,7 @@ resources
 
 ### 项目运行
 
-直接运行启动类`MallTinyApplication`的`main`函数即可。
+直接运行启动类`HzfcApplication`的`main`函数即可。
 
 ### 业务代码开发流程
 
@@ -224,7 +224,7 @@ public class UmsMenuServiceImpl extends ServiceImpl<UmsMenuMapper,UmsMenu>implem
  * 后台菜单表 Mapper 接口
  * </p>
  *
- * @author macro
+ * @author hzfc
  * @since 2020-08-21
  */
 public interface UmsMenuMapper extends BaseMapper<UmsMenu> {
@@ -242,9 +242,9 @@ public interface UmsMenuMapper extends BaseMapper<UmsMenu> {
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.macro.mall.tiny.modules.ums.mapper.UmsMenuMapper">
+<mapper namespace="com.hzfc.management.yjzx.modules.ums.mapper.UmsMenuMapper">
 
-    <select id="getMenuList" resultType="com.macro.mall.tiny.modules.ums.model.UmsMenu">
+    <select id="getMenuList" resultType="com.hzfc.management.yjzx.modules.ums.model.UmsMenu">
         SELECT
             m.id id,
             m.parent_id parentId,
@@ -318,7 +318,7 @@ public class UmsAdminLoginParam {
 ```java
 /**
  * 后台用户管理
- * Created by macro on 2018/4/26.
+ *hzfc
  */
 @Controller
 @Api(tags = "UmsAdminController", description = "后台用户管理")

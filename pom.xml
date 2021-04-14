@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.macro.mall</groupId>
-    <artifactId>mall-tiny</artifactId>
+    <groupId>com.management.yjzx</groupId>
+    <artifactId>hzfc-yjzx</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>mall-tiny</name>
-    <description>mall-tiny project</description>
+    <name>hzfc-yjzx</name>
+    <description>hzfc-yjzx project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -142,6 +142,30 @@
             <artifactId>velocity-engine-core</artifactId>
             <version>${velocity.version}</version>
         </dependency>
+
+        <!-- word导出  方式一：poi-tl-->
+        <!-- poi-tl是基于Apache POI的Word模板引擎。poi-tl依赖的是poi3.16版本 -->
+        <dependency>
+            <groupId>com.deepoove</groupId>
+            <artifactId>poi-tl</artifactId>
+            <version>1.7.3</version>
+        </dependency>
+        <!--  上面需要的依赖-->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>4.1.2</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -164,7 +188,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <imageName>mall-tiny/${project.artifactId}:${project.version}</imageName>
+                    <imageName>hzfc-yjzx/${project.artifactId}:${project.version}</imageName>
                     <dockerHost>${docker.host}</dockerHost>
                     <baseImage>java:8</baseImage>
                     <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
