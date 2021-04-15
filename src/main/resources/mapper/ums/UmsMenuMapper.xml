@@ -4,58 +4,60 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.hzfc.management.yjzx.modules.ums.model.UmsMenu">
-        <id column="id" property="id" />
-        <result column="parent_id" property="parentId" />
-        <result column="create_time" property="createTime" />
-        <result column="title" property="title" />
-        <result column="level" property="level" />
-        <result column="sort" property="sort" />
-        <result column="name" property="name" />
-        <result column="icon" property="icon" />
-        <result column="hidden" property="hidden" />
+        <id column="id" property="ID"/>
+        <result column="parentId" property="PARENTID"/>
+        <result column="createTime" property="CREATETIME"/>
+        <result column="title" property="TITLE"/>
+        <result column="mlevel" property="MLEVEL"/>
+        <result column="sort" property="SORT"/>
+        <result column="name" property="NAME"/>
+        <result column="icon" property="ICON"/>
+        <result column="hidden" property="HIDDEN"/>
     </resultMap>
 
     <select id="getMenuList" resultType="com.hzfc.management.yjzx.modules.ums.model.UmsMenu">
         SELECT
+        distinct
             m.id id,
-            m.parent_id parentId,
-            m.create_time createTime,
+            m.parentid parentId,
+            m.createtime createTime,
             m.title title,
-            m.level level,
+            m.mlevel mlevel,
             m.sort sort,
             m.name name,
             m.icon icon,
             m.hidden hidden
         FROM
-            ums_admin_role_relation arr
-                LEFT JOIN ums_role r ON arr.role_id = r.id
-                LEFT JOIN ums_role_menu_relation rmr ON r.id = rmr.role_id
-                LEFT JOIN ums_menu m ON rmr.menu_id = m.id
+            hz_test.ums_admin_role_relation arr
+                LEFT JOIN hz_test.ums_role r ON arr.roleid = r.id
+                LEFT JOIN hz_test.ums_role_menu_relation rmr ON r.id = rmr.roleid
+                LEFT JOIN hz_test.ums_menu m ON rmr.menuid = m.id
         WHERE
-            arr.admin_id = #{adminId}
+            arr.adminid = #{adminId}
           AND m.id IS NOT NULL
-        GROUP BY
-            m.id
+        /*GROUP BY
+            m.id*/
     </select>
     <select id="getMenuListByRoleId" resultType="com.hzfc.management.yjzx.modules.ums.model.UmsMenu">
         SELECT
+        distinct
             m.id id,
             m.parent_id parentId,
-            m.create_time createTime,
+            m.createTime createTime,
             m.title title,
-            m.level level,
+            m.mlevel mlevel,
             m.sort sort,
             m.name name,
             m.icon icon,
             m.hidden hidden
         FROM
-            ums_role_menu_relation rmr
-                LEFT JOIN ums_menu m ON rmr.menu_id = m.id
+            hz_test.ums_role_menu_relation rmr
+                LEFT JOIN hz_test.ums_menu m ON rmr.menuid = m.id
         WHERE
-            rmr.role_id = #{roleId}
+            rmr.roleid = #{roleId}
           AND m.id IS NOT NULL
-        GROUP BY
-            m.id
+        /*GROUP BY
+            m.id*/
     </select>
 
 </mapper>

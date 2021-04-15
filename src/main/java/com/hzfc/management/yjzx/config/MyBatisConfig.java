@@ -1,5 +1,7 @@
 package com.hzfc.management.yjzx.config;
 
+import com.baomidou.mybatisplus.core.incrementer.IKeyGenerator;
+import com.baomidou.mybatisplus.extension.incrementer.OracleKeyGenerator;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;
 import org.mybatis.spring.annotation.MapperScan;
@@ -21,4 +23,10 @@ public class MyBatisConfig {
         paginationInterceptor.setCountSqlParser(new JsqlParserCountOptimize(true));
         return paginationInterceptor;
     }
+
+    @Bean
+    public IKeyGenerator keyGenerator() {
+        return new OracleKeyGenerator();
+    }
+
 }

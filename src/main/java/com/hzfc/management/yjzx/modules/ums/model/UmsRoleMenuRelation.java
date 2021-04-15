@@ -1,5 +1,6 @@
 package com.hzfc.management.yjzx.modules.ums.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -19,19 +20,21 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("ums_role_menu_relation")
+@TableName("HZ_TEST.UMS_ROLE_MENU_RELATION")
 @ApiModel(value="UmsRoleMenuRelation对象", description="后台角色菜单关系表")
 public class UmsRoleMenuRelation implements Serializable {
 
     private static final long serialVersionUID=1L;
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty(value = "角色ID")
+    @TableField("ROLEID")
     private Long roleId;
 
     @ApiModelProperty(value = "菜单ID")
+    @TableField("MENUID")
     private Long menuId;
 
 

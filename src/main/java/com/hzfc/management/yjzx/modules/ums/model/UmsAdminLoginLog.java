@@ -1,10 +1,11 @@
 package com.hzfc.management.yjzx.modules.ums.model;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.util.Date;
-import com.baomidou.mybatisplus.annotation.TableId;
+
 import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,24 +21,30 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("ums_admin_login_log")
-@ApiModel(value="UmsAdminLoginLog对象", description="后台用户登录日志表")
+@TableName("HZ_TEST.UMS_ADMIN_LOGIN_LOG")
+@ApiModel(value = "UmsAdminLoginLog对象", description = "后台用户登录日志表")
+@KeySequence(value = "HZ_TEST.SEQ_UMS_ADMINLOGIN")
 public class UmsAdminLoginLog implements Serializable {
 
-    private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.INPUT)
     private Long id;
 
+    @TableField("ADMINID")
     private Long adminId;
 
+    @TableField("CREATETIME")
     private Date createTime;
 
+    @TableField("IP")
     private String ip;
 
+    @TableField("ADDRESS")
     private String address;
 
     @ApiModelProperty(value = "浏览器登录类型")
+    @TableField("USERAGENT")
     private String userAgent;
 
 

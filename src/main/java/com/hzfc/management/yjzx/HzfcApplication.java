@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /*@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class})*/
 @SpringBootApplication
-public class MallTinyApplication {
+public class HzfcApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MallTinyApplication.class, args);
+        SpringApplication.run(HzfcApplication.class, args);
     }
 
 }

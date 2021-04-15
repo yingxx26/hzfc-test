@@ -34,14 +34,14 @@ public class UmsMenuServiceImpl extends ServiceImpl<UmsMenuMapper,UmsMenu>implem
     private void updateLevel(UmsMenu umsMenu) {
         if (umsMenu.getParentId() == 0) {
             //没有父菜单时为一级菜单
-            umsMenu.setLevel(0);
+            umsMenu.setMlevel(0);
         } else {
             //有父菜单时选择根据父菜单level设置
             UmsMenu parentMenu = getById(umsMenu.getParentId());
             if (parentMenu != null) {
-                umsMenu.setLevel(parentMenu.getLevel() + 1);
+                umsMenu.setMlevel(parentMenu.getMlevel() + 1);
             } else {
-                umsMenu.setLevel(0);
+                umsMenu.setMlevel(0);
             }
         }
     }

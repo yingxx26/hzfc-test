@@ -1,6 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/mall_tiny?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@192.168.181.1:1521:ORCL
     username: root
     password: 123456
   redis:

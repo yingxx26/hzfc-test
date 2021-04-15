@@ -4,47 +4,48 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.hzfc.management.yjzx.modules.ums.model.UmsResource">
-        <id column="id" property="id" />
-        <result column="create_time" property="createTime" />
-        <result column="name" property="name" />
-        <result column="url" property="url" />
-        <result column="description" property="description" />
-        <result column="category_id" property="categoryId" />
+        <id column="id" property="ID"/>
+        <result column="createTime" property="CREATETIME"/>
+        <result column="name" property="NAME"/>
+        <result column="url" property="URL"/>
+        <result column="description" property="DESCRIPTION"/>
+        <result column="categoryId" property="CATEGORYID"/>
     </resultMap>
 
     <select id="getResourceList" resultType="com.hzfc.management.yjzx.modules.ums.model.UmsResource">
         SELECT
+        distinct
             ur.id id,
-            ur.create_time createTime,
-            ur.`name` `name`,
+            ur.createtime createTime,
+            ur.name name,
             ur.url url,
             ur.description description,
-            ur.category_id categoryId
+            ur.categoryid categoryId
         FROM
-            ums_admin_role_relation ar
-                LEFT JOIN ums_role r ON ar.role_id = r.id
-                LEFT JOIN ums_role_resource_relation rrr ON r.id = rrr.role_id
-                LEFT JOIN ums_resource ur ON ur.id = rrr.resource_id
+            hz_test.ums_admin_role_relation ar
+                LEFT JOIN hz_test.ums_role r ON ar.roleid = r.id
+                LEFT JOIN hz_test.ums_role_resource_relation rrr ON r.id = rrr.roleid
+                LEFT JOIN hz_test.ums_resource ur ON ur.id = rrr.resourceid
         WHERE
-            ar.admin_id = #{adminId}
+            ar.adminid = #{adminId}
           AND ur.id IS NOT NULL
-        GROUP BY
-            ur.id
+       /* GROUP BY
+            ur.id*/
     </select>
 
     <select id="getResourceListByRoleId" resultType="com.hzfc.management.yjzx.modules.ums.model.UmsResource">
         SELECT
             r.id id,
-            r.create_time createTime,
+            r.createtime createTime,
             r.`name` `name`,
             r.url url,
             r.description description,
-            r.category_id categoryId
+            r.categoryid categoryId
         FROM
             ums_role_resource_relation rrr
-                LEFT JOIN ums_resource r ON rrr.resource_id = r.id
+                LEFT JOIN ums_resource r ON rrr.resourceid = r.id
         WHERE
-            rrr.role_id = #{roleId}
+            rrr.roleid = #{roleId}
           AND r.id IS NOT NULL
         GROUP BY
             r.id

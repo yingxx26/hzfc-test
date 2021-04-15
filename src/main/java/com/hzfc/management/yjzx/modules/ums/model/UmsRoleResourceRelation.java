@@ -1,5 +1,6 @@
 package com.hzfc.management.yjzx.modules.ums.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -19,19 +20,21 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("ums_role_resource_relation")
+@TableName("HZ_TEST.UMS_ROLE_RESOURCE_RELATION")
 @ApiModel(value="UmsRoleResourceRelation对象", description="后台角色资源关系表")
 public class UmsRoleResourceRelation implements Serializable {
 
     private static final long serialVersionUID=1L;
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty(value = "角色ID")
+    @TableField("ROLEID")
     private Long roleId;
 
     @ApiModelProperty(value = "资源ID")
+    @TableField("RESOURCEID")
     private Long resourceId;
 
 
