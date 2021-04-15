@@ -1,12 +1,8 @@
 package com.hzfc.management.yjzx.modules.ums.model;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.util.Date;
-
-import com.baomidou.mybatisplus.annotation.TableId;
 
 import java.io.Serializable;
 
@@ -27,11 +23,12 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @TableName("HZ_TEST.UMS_ADMIN")
 @ApiModel(value = "UmsAdmin对象", description = "后台用户表")
+@KeySequence(value = "HZ_TEST.SEQ_UMS_ADMIN")
 public class UmsAdmin implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "ID", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.INPUT)
     private Long id;
 
     @TableField("USERNAME")

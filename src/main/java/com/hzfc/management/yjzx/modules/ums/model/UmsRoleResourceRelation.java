@@ -1,9 +1,7 @@
 package com.hzfc.management.yjzx.modules.ums.model;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,6 +20,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @TableName("HZ_TEST.UMS_ROLE_RESOURCE_RELATION")
 @ApiModel(value="UmsRoleResourceRelation对象", description="后台角色资源关系表")
+@KeySequence(value = "HZ_TEST.SEQ_UMS_ROLERESOURCERELATION")
 public class UmsRoleResourceRelation implements Serializable {
 
     private static final long serialVersionUID=1L;
