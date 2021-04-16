@@ -42,7 +42,7 @@
         SELECT
         distinct
             m.id id,
-            m.parent_id parentId,
+            m.parentid parentId,
             m.createTime createTime,
             m.title title,
             m.mlevel mlevel,
