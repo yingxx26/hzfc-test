@@ -3,6 +3,7 @@ package com.hzfc.management.yjzx.modules.reports.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hzfc.management.yjzx.common.api.CommonPage;
 import com.hzfc.management.yjzx.common.api.CommonResult;
+import com.hzfc.management.yjzx.modules.reports.dto.ReportsWordTemplateParam;
 import com.hzfc.management.yjzx.modules.reports.dto.WordTemplateBase64;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
@@ -15,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -22,11 +24,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.io.File;
+import java.io.IOException;
+import java.security.Principal;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -75,6 +75,23 @@ public class ReportsWordTemplateController {
         return CommonResult.failed();
     }
 
+    @ApiOperation(value = "新增模板")
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult<ReportsWordTemplate> create(@Validated @RequestBody ReportsWordTemplateParam wordTemplate, Principal principal) {
+        ReportsWordTemplate reportsWordTemplate = new ReportsWordTemplate();
+        BeanUtils.copyProperties(wordTemplate, reportsWordTemplate);
+        String name = principal.getName();
+        reportsWordTemplate.setCreateuser(name);
+        reportsWordTemplate.setCreateTime(new Date());
+        boolean success = reportsWordTemplateService.create(reportsWordTemplate);
+        if (success) {
+            return CommonResult.success(null);
+        } else {
+            return CommonResult.failed();
+        }
+    }
+
     // 文件上传 （可以多文件上传）
     @PostMapping("/upload")
     @ResponseBody
@@ -101,7 +118,7 @@ public class ReportsWordTemplateController {
             // 打印日志
             LOGGER.info("上传成功，当前上传的文件保存在 {}", filePath + newFileName);
             // 自定义返回的统一的 JSON 格式的数据，可以直接返回这个字符串也是可以的。
-            return CommonResult.success("上传成功");
+            return CommonResult.success(newFileName);
         } catch (IOException e) {
             LOGGER.error(e.toString());
         }

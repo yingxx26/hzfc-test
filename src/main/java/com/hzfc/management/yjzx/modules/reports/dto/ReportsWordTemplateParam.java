@@ -17,6 +17,9 @@ import java.util.Date;
 @Setter
 public class ReportsWordTemplateParam {
 
+    @ApiModelProperty(value = "模板名称")
+    private String templatename;
+
     @ApiModelProperty(value = "创建人")
     private String createuser;
 
@@ -29,9 +32,7 @@ public class ReportsWordTemplateParam {
     @ApiModelProperty(value = "模板路径")
     private String templatepath;
 
-    @ApiModelProperty(value = "模板名称")
-    private String templatename;
-
     @ApiModelProperty(value = "是否在用")
     private Integer inuse;
+
 }

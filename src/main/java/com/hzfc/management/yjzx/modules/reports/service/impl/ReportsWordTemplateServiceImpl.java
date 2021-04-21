@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 /**
  * 后台管理员管理Service实现类
  * Created by hzfc on 2018/4/26.
@@ -21,7 +23,31 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportsWordTemplateServiceImpl.class);
 
 
-    /*@Override
+    @Override
+    public boolean create(ReportsWordTemplate reportsWordTemplate) {
+        return save(reportsWordTemplate);
+    }
+
+    @Override
+    public Page<ReportsWordTemplate> list(String keyword, Integer pageSize, Integer pageNum) {
+        Page<ReportsWordTemplate> page = new Page<>(pageNum, pageSize);
+        QueryWrapper<ReportsWordTemplate> wrapper = new QueryWrapper<>();
+        LambdaQueryWrapper<ReportsWordTemplate> lambda = wrapper.lambda();
+        if (StrUtil.isNotEmpty(keyword)) {
+            lambda.like(ReportsWordTemplate::getCreateuser, keyword);
+            lambda.or().like(ReportsWordTemplate::getUsepurpose, keyword);
+        }
+        return page(page, wrapper);
+    }
+
+    @Override
+    public boolean update(Long id, ReportsWordTemplate reportsWordTemplate) {
+        reportsWordTemplate.setId(id);
+        boolean success = updateById(reportsWordTemplate);
+        return success;
+    }
+
+     /*@Override
     public UmsAdmin getAdminByUsername(String username) {
 
         QueryWrapper<UmsAdmin> wrapper = new QueryWrapper<>();
@@ -47,35 +73,12 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
         wrapper.lambda().eq(UmsAdmin::getUsername, username);
         update(record, wrapper);
     }*/
-    @Override
-    public Page<ReportsWordTemplate> list(String keyword, Integer pageSize, Integer pageNum) {
-        Page<ReportsWordTemplate> page = new Page<>(pageNum, pageSize);
-        QueryWrapper<ReportsWordTemplate> wrapper = new QueryWrapper<>();
-        LambdaQueryWrapper<ReportsWordTemplate> lambda = wrapper.lambda();
-        if (StrUtil.isNotEmpty(keyword)) {
-            lambda.like(ReportsWordTemplate::getCreateuser, keyword);
-            lambda.or().like(ReportsWordTemplate::getUsepurpose, keyword);
-        }
-        return page(page, wrapper);
-    }
 
-    @Override
-    public boolean update(Long id, ReportsWordTemplate reportsWordTemplate) {
-        reportsWordTemplate.setId(id);
-        boolean success = updateById(reportsWordTemplate);
-        return success;
-    }
 /*
     @Override
     public boolean delete(Long id) {
         boolean success = removeById(id);
         return success;
-    }
-
-
-    @Override
-    public List<UmsRole> getRoleList(Long adminId) {
-        return roleMapper.getRoleList(adminId);
     }
 
 
