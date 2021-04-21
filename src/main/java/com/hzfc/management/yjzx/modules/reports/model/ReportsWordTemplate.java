@@ -41,8 +41,16 @@ public class ReportsWordTemplate implements Serializable {
     @TableField("CREATETIME")
     private Date createTime;
 
-    @ApiModelProperty(value = "文档路径")
-    @TableField("WORDPATH")
-    private String wordpath;
+    @ApiModelProperty(value = "模板路径")
+    @TableField("TEMPLATEPATH")
+    private String templatepath;
+
+    @ApiModelProperty(value = "模板名称")
+    @TableField("TEMPLATENAME")
+    private String templatename;
+
+    @ApiModelProperty(value = "是否在用")
+    @TableField("INUSE")
+    private Integer inuse;
 
 }

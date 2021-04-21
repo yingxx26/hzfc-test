@@ -3,6 +3,7 @@ package com.hzfc.management.yjzx.modules.reports.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hzfc.management.yjzx.common.api.CommonPage;
 import com.hzfc.management.yjzx.common.api.CommonResult;
+import com.hzfc.management.yjzx.modules.reports.dto.WordTemplateBase64;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
 import com.hzfc.management.yjzx.modules.ums.dto.UpdateAdminPasswordParam;
@@ -15,12 +16,20 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,6 +41,10 @@ import java.util.List;
 @RequestMapping("reports/wordtemplate")
 public class ReportsWordTemplateController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportsWordTemplateController.class);
+
+    // 将 yml 中的自定义配置注入到这里
+    @Value("${hzfc.uploadfile.word.path}")
+    private String filePath;
 
     @Autowired
     private UmsAdminService adminService;
@@ -49,34 +62,67 @@ public class ReportsWordTemplateController {
         return CommonResult.success(CommonPage.restPage(reportsWordTemplateList));
     }
 
+    @ApiOperation("修改模板状态")
+    @RequestMapping(value = "/updateStatus/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult updateStatus(@PathVariable Long id, @RequestParam(value = "inuse") Integer inuse) {
+        ReportsWordTemplate reportsWordTemplate = new ReportsWordTemplate();
+        reportsWordTemplate.setInuse(inuse);
+        boolean success = reportsWordTemplateService.update(id, reportsWordTemplate);
+        if (success) {
+            return CommonResult.success(null);
+        }
+        return CommonResult.failed();
+    }
+
+    // 文件上传 （可以多文件上传）
+    @PostMapping("/upload")
+    @ResponseBody
+    public CommonResult fileUploads(@RequestBody WordTemplateBase64 wordBase64) {
+        ZonedDateTime now = ZonedDateTime.now();
+        // ISO_LOCAL_DATE 2020-03-25
+        String format1 = DateTimeFormatter.ISO_LOCAL_DATE.format(now);
+        MultipartFile multipartFile = Base64FileUtil.base64ToMultipart(wordBase64.getWordBase64());
+        // 获取上传的文件名称
+        // String fileName = multipartFile.
+        // 时间 和 日期拼接
+        String newFileName = format1 + ".docx";
+        // 得到文件保存的位置以及新文件名
+        File dest = new File(filePath + newFileName);
+        try {
+            if (!dest.exists()) {
+                //先得到文件的上级目录，并创建上级目录，在创建文件
+                dest.getParentFile().mkdirs();
+                //创建文件
+                dest.createNewFile();
+            }
+            // 上传的文件被保存了
+            multipartFile.transferTo(dest);
+            // 打印日志
+            LOGGER.info("上传成功，当前上传的文件保存在 {}", filePath + newFileName);
+            // 自定义返回的统一的 JSON 格式的数据，可以直接返回这个字符串也是可以的。
+            return CommonResult.success("上传成功");
+        } catch (IOException e) {
+            LOGGER.error(e.toString());
+        }
+        // 待完成 —— 文件类型校验工作
+        return CommonResult.failed("上传错误");
+    }
+
 
     /**
      * 文件预览，需注意有些文件(比如word文档)是无法在浏览器预览的，这里演示图片的预览
      *
      * @param id
-     * @param response
+     * @param
      * @return
      */
     @RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<String> view(@PathVariable("id") Long id, HttpServletResponse response) {
-        /**
-         * 关于文件的信息，实际中应该是根据某个字段去数据库查询得到的，比如根据该文件记录在DB中的id
-         * 这里方便演示，我直接写死了文件的路径filePath
-         */
-      /*  String filePath = "G://wordTest/file/word/1618484727876.docx"; // 本该根据ID去数据库查，这里是hard code
-        // 设返回的contentType
-        response.setContentType("application/msword"); // 不同文件的MimeType参考后续链接
-        // 读取路径下面的文件
-        try {
-            FileCopyUtils.copy(new FileInputStream(filePath), response.getOutputStream());
-        } catch (IOException e) {
-
-        }
-        LOGGER.info("");*/
-
+    public CommonResult<String> view(@PathVariable("id") Long id) {
+        ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(id);
         String serverUrl = "G://wordTest/file/word/";
-        String url = serverUrl + "1618484727876.docx";
+        String url = serverUrl + "hhh.docx";
         File file = new File(url);
         //判断文件是否存在如果不存在就返回默认图标
         if (!(file.exists() && file.canRead())) {
@@ -142,18 +188,6 @@ public class ReportsWordTemplateController {
         return CommonResult.failed();
     }
 
-    @ApiOperation("修改帐号状态")
-    @RequestMapping(value = "/updateStatus/{id}", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult updateStatus(@PathVariable Long id, @RequestParam(value = "status") Integer status) {
-        UmsAdmin umsAdmin = new UmsAdmin();
-        umsAdmin.setStatus(status);
-        boolean success = adminService.update(id, umsAdmin);
-        if (success) {
-            return CommonResult.success(null);
-        }
-        return CommonResult.failed();
-    }
 
     @ApiOperation("给用户分配角色")
     @RequestMapping(value = "/role/update", method = RequestMethod.POST)

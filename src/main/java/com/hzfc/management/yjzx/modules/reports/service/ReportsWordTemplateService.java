@@ -19,16 +19,16 @@ import java.util.List;
 public interface ReportsWordTemplateService extends IService<ReportsWordTemplate> {
 
     /**
-     * 根据用户名或昵称分页查询用户
+     * 根据用户名或昵称分页查询模板
      */
     Page<ReportsWordTemplate> list(String keyword, Integer pageSize, Integer pageNum);
 
     /**
-     * 修改指定用户信息
+     * 修改指定模板
      */
-    /* boolean update(Long id, UmsAdmin admin);
+    boolean update(Long id, ReportsWordTemplate reportsWordTemplate);
 
-     *//**
+    /* *//**
      * 删除指定用户
      *//*
     boolean delete(Long id);

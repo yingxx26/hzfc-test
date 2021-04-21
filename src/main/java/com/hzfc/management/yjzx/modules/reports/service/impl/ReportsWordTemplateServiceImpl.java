@@ -59,25 +59,13 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
         return page(page, wrapper);
     }
 
-   /* @Override
-    public boolean update(Long id, UmsAdmin admin) {
-        admin.setId(id);
-        UmsAdmin rawAdmin = getById(id);
-        if (rawAdmin.getPassword().equals(admin.getPassword())) {
-            //与原加密密码相同的不需要修改
-            admin.setPassword(null);
-        } else {
-            //与原加密密码不同的需要加密修改
-            if (StrUtil.isEmpty(admin.getPassword())) {
-                admin.setPassword(null);
-            } else {
-                admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-            }
-        }
-        boolean success = updateById(admin);
+    @Override
+    public boolean update(Long id, ReportsWordTemplate reportsWordTemplate) {
+        reportsWordTemplate.setId(id);
+        boolean success = updateById(reportsWordTemplate);
         return success;
     }
-
+/*
     @Override
     public boolean delete(Long id) {
         boolean success = removeById(id);

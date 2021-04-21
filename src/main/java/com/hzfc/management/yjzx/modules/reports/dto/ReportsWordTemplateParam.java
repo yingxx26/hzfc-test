@@ -1,5 +1,6 @@
 package com.hzfc.management.yjzx.modules.reports.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,12 @@ public class ReportsWordTemplateParam {
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 
-    @ApiModelProperty(value = "创建时间")
-    private String wordpath;
+    @ApiModelProperty(value = "模板路径")
+    private String templatepath;
+
+    @ApiModelProperty(value = "模板名称")
+    private String templatename;
+
+    @ApiModelProperty(value = "是否在用")
+    private Integer inuse;
 }
