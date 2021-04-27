@@ -30,9 +30,13 @@ public class ReportsWordTemplateParam {
     private Date createTime;
 
     @ApiModelProperty(value = "模板路径")
+    @NotEmpty
     private String templatepath;
 
     @ApiModelProperty(value = "是否在用")
     private Integer inuse;
+
+    @ApiModelProperty(value = "文件base64字符串")
+    private String wordBase64;
 
 }

@@ -3,6 +3,7 @@ package com.hzfc.management.yjzx.modules.reports.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hzfc.management.yjzx.common.api.CommonPage;
 import com.hzfc.management.yjzx.common.api.CommonResult;
+import com.hzfc.management.yjzx.common.exception.ApiException;
 import com.hzfc.management.yjzx.modules.reports.dto.ReportsWordTemplateParam;
 import com.hzfc.management.yjzx.modules.reports.dto.WordTemplateBase64;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
@@ -20,6 +21,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +45,7 @@ public class ReportsWordTemplateController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportsWordTemplateController.class);
 
     // 将 yml 中的自定义配置注入到这里
-    @Value("${hzfc.uploadfile.word.path}")
+    @Value("${hzfc.uploadfile.wordTemplate.path}")
     private String filePath;
 
     @Autowired
@@ -79,12 +81,16 @@ public class ReportsWordTemplateController {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult<ReportsWordTemplate> create(@Validated @RequestBody ReportsWordTemplateParam wordTemplate, Principal principal) {
+        String wordBase64 = wordTemplate.getWordBase64();
+        if (StringUtils.isEmpty(wordBase64)) {
+            return CommonResult.failed("请先上传图片");
+        }
         ReportsWordTemplate reportsWordTemplate = new ReportsWordTemplate();
         BeanUtils.copyProperties(wordTemplate, reportsWordTemplate);
         String name = principal.getName();
         reportsWordTemplate.setCreateuser(name);
         reportsWordTemplate.setCreateTime(new Date());
-        boolean success = reportsWordTemplateService.create(reportsWordTemplate);
+        boolean success = reportsWordTemplateService.create(reportsWordTemplate, wordBase64);
         if (success) {
             return CommonResult.success(null);
         } else {
@@ -92,20 +98,61 @@ public class ReportsWordTemplateController {
         }
     }
 
+    /**
+     * 文件预览，需注意有些文件(比如word文档)是无法在浏览器预览的，这里演示图片的预览
+     *
+     * @param id
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<String> view(@PathVariable("id") Long id) {
+        ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(id);
+        if (reportsWordTemplate == null) {
+            return CommonResult.failed("文件不存在");
+        }
+        String templatepath = reportsWordTemplate.getTemplatepath();
+
+        if (StringUtils.isEmpty(templatepath)) {
+            return CommonResult.failed("文件不存在");
+        }
+        String base64 = null;
+        try {
+            base64 = Base64FileUtil.fileToBase64(templatepath);
+        } catch (Exception e) {
+            return CommonResult.failed("文件异常");
+        }
+        return CommonResult.success(base64);
+    }
+
+
+    @ApiOperation("删除指定模板")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult delete(@PathVariable Long id) {
+
+        boolean success = reportsWordTemplateService.delete(id);
+        if (success) {
+            return CommonResult.success(null);
+        }
+        return CommonResult.failed();
+    }
+
     // 文件上传 （可以多文件上传）
-    @PostMapping("/upload")
+    /*@PostMapping("/upload")
     @ResponseBody
     public CommonResult fileUploads(@RequestBody WordTemplateBase64 wordBase64) {
         ZonedDateTime now = ZonedDateTime.now();
         // ISO_LOCAL_DATE 2020-03-25
-        String format1 = DateTimeFormatter.ISO_LOCAL_DATE.format(now);
+        String format1 = DateTimeFormatter.ofPattern("yyyy-MM-dd-ss").format(now);
         MultipartFile multipartFile = Base64FileUtil.base64ToMultipart(wordBase64.getWordBase64());
-        // 获取上传的文件名称
-        // String fileName = multipartFile.
+
         // 时间 和 日期拼接
-        String newFileName = format1 + ".docx";
+        String newFileName = format1 + "wordTemplate.docx";
+        String path = filePath + newFileName;
         // 得到文件保存的位置以及新文件名
-        File dest = new File(filePath + newFileName);
+        File dest = new File(path);
         try {
             if (!dest.exists()) {
                 //先得到文件的上级目录，并创建上级目录，在创建文件
@@ -124,105 +171,5 @@ public class ReportsWordTemplateController {
         }
         // 待完成 —— 文件类型校验工作
         return CommonResult.failed("上传错误");
-    }
-
-
-    /**
-     * 文件预览，需注意有些文件(比如word文档)是无法在浏览器预览的，这里演示图片的预览
-     *
-     * @param id
-     * @param
-     * @return
-     */
-    @RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
-    @ResponseBody
-    public CommonResult<String> view(@PathVariable("id") Long id) {
-        ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(id);
-        String serverUrl = "G://wordTest/file/word/";
-        String url = serverUrl + "hhh.docx";
-        File file = new File(url);
-        //判断文件是否存在如果不存在就返回默认图标
-        if (!(file.exists() && file.canRead())) {
-            /*file = new File(request.getSession().getServletContext().getRealPath("/")
-                    + "resource/icons/auth/root.png");*/
-        }
-        String base64 = null;
-        try {
-            base64 = Base64FileUtil.fileToBase64(url);
-            System.out.println();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return CommonResult.success(base64);
-    }
-
-
-    @ApiOperation("获取指定用户信息")
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
-    public CommonResult<UmsAdmin> getItem(@PathVariable Long id) {
-        UmsAdmin admin = adminService.getById(id);
-        return CommonResult.success(admin);
-    }
-
-    @ApiOperation("修改指定用户信息")
-    @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult update(@PathVariable Long id, @RequestBody UmsAdmin admin) {
-        boolean success = adminService.update(id, admin);
-        if (success) {
-            return CommonResult.success(null);
-        }
-        return CommonResult.failed();
-    }
-
-    @ApiOperation("修改指定用户密码")
-    @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult updatePassword(@Validated @RequestBody UpdateAdminPasswordParam updatePasswordParam) {
-        int status = adminService.updatePassword(updatePasswordParam);
-        if (status > 0) {
-            return CommonResult.success(status);
-        } else if (status == -1) {
-            return CommonResult.failed("提交参数不合法");
-        } else if (status == -2) {
-            return CommonResult.failed("找不到该用户");
-        } else if (status == -3) {
-            return CommonResult.failed("旧密码错误");
-        } else {
-            return CommonResult.failed();
-        }
-    }
-
-    @ApiOperation("删除指定用户信息")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult delete(@PathVariable Long id) {
-        boolean success = adminService.delete(id);
-        if (success) {
-            return CommonResult.success(null);
-        }
-        return CommonResult.failed();
-    }
-
-
-    @ApiOperation("给用户分配角色")
-    @RequestMapping(value = "/role/update", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult updateRole(@RequestParam("adminId") Long adminId,
-                                   @RequestParam("roleIds") List<Long> roleIds) {
-        int count = adminService.updateRole(adminId, roleIds);
-        if (count >= 0) {
-            return CommonResult.success(count);
-        }
-        return CommonResult.failed();
-    }
-
-    @ApiOperation("获取指定用户的角色")
-    @RequestMapping(value = "/role/{adminId}", method = RequestMethod.GET)
-    @ResponseBody
-    public CommonResult<List<UmsRole>> getRoleList(@PathVariable Long adminId) {
-        List<UmsRole> roleList = adminService.getRoleList(adminId);
-        return CommonResult.success(roleList);
-    }
+    }*/
 }

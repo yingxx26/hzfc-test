@@ -5,14 +5,23 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hzfc.management.yjzx.common.exception.ApiException;
 import com.hzfc.management.yjzx.modules.reports.mapper.ReportsWordTemplateMapper;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
+import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
+import com.hzfc.management.yjzx.utils.fileutils.DeleteFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
+import java.io.File;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 后台管理员管理Service实现类
@@ -21,10 +30,39 @@ import java.util.Date;
 @Service
 public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTemplateMapper, ReportsWordTemplate> implements ReportsWordTemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportsWordTemplateServiceImpl.class);
-
+    // 将 yml 中的自定义配置注入到这里
+    @Value("${hzfc.uploadfile.wordTemplate.path}")
+    private String filePath;
 
     @Override
-    public boolean create(ReportsWordTemplate reportsWordTemplate) {
+    @Transactional
+    public boolean create(ReportsWordTemplate reportsWordTemplate, String wordBase64) {
+
+        ZonedDateTime now = ZonedDateTime.now();
+        // ISO_LOCAL_DATE 2020-03-25
+        String format1 = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(now);
+        // 时间 和 日期拼接
+        String newFileName = "WT" + format1 + ".docx";
+        String path = filePath + newFileName;
+        // 得到文件保存的位置以及新文件名
+        try {
+            File dest = new File(path);
+            MultipartFile multipartFile = Base64FileUtil.base64ToMultipart(wordBase64);
+            if (!dest.exists()) {
+                //先得到文件的上级目录，并创建上级目录，在创建文件
+                dest.getParentFile().mkdirs();
+                //创建文件
+                dest.createNewFile();
+            }
+            // 上传的文件被保存了
+            multipartFile.transferTo(dest);
+            // 打印日志
+            LOGGER.info("上传成功，当前上传的文件保存在 {}", path);
+        } catch (IOException e) {
+            LOGGER.error(e.toString());
+            throw new ApiException("上传异常");
+        }
+        reportsWordTemplate.setTemplatepath(path);
         return save(reportsWordTemplate);
     }
 
@@ -47,61 +85,12 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
         return success;
     }
 
-     /*@Override
-    public UmsAdmin getAdminByUsername(String username) {
-
-        QueryWrapper<UmsAdmin> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(UmsAdmin::getUsername, username);
-        List<UmsAdmin> adminList = list(wrapper);
-        if (adminList != null && adminList.size() > 0) {
-            UmsAdmin admin = adminList.get(0);
-            return admin;
-        }
-        return null;
-    }
-
-
-    */
-
-    /**
-     * 根据用户名修改登录时间
-     *//*
-    private void updateLoginTimeByUsername(String username) {
-        UmsAdmin record = new UmsAdmin();
-        record.setLoginTime(new Date());
-        QueryWrapper<UmsAdmin> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(UmsAdmin::getUsername, username);
-        update(record, wrapper);
-    }*/
-
-/*
     @Override
     public boolean delete(Long id) {
+        ReportsWordTemplate reportsWordTemplate = getById(id);
+        DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
         boolean success = removeById(id);
         return success;
     }
-
-
-    @Override
-    public int updatePassword(UpdateAdminPasswordParam param) {
-        if (StrUtil.isEmpty(param.getUsername())
-                || StrUtil.isEmpty(param.getOldPassword())
-                || StrUtil.isEmpty(param.getNewPassword())) {
-            return -1;
-        }
-        QueryWrapper<UmsAdmin> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(UmsAdmin::getUsername, param.getUsername());
-        List<UmsAdmin> adminList = list(wrapper);
-        if (CollUtil.isEmpty(adminList)) {
-            return -2;
-        }
-        UmsAdmin umsAdmin = adminList.get(0);
-        if (!passwordEncoder.matches(param.getOldPassword(), umsAdmin.getPassword())) {
-            return -3;
-        }
-        umsAdmin.setPassword(passwordEncoder.encode(param.getNewPassword()));
-        updateById(umsAdmin);
-        return 1;
-    }*/
 
 }

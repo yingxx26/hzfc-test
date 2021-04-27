@@ -20,17 +20,11 @@ public interface ReportsWordTemplateService extends IService<ReportsWordTemplate
      */
     boolean update(Long id, ReportsWordTemplate reportsWordTemplate);
 
-    boolean create(ReportsWordTemplate reportsWordTemplate);
+    boolean create(ReportsWordTemplate reportsWordTemplate, String wordBase64);
 
-    /* *//**
+    /**
      * 删除指定用户
-     *//*
+     */
     boolean delete(Long id);
 
-
-    *//**
-     * 修改密码
-     *//*
-    int updatePassword(UpdateAdminPasswordParam updatePasswordParam);
-    */
 }

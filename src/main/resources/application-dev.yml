@@ -19,5 +19,5 @@ logging:
 
 hzfc:
   uploadfile:
-    word:
-      path: G:/wordTest/uploadfile/word/
+    wordTemplate:
+      path: G:/wordTest/uploadfile/wordTemplate/
