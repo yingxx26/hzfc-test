@@ -1,12 +1,9 @@
 package com.hzfc.management.yjzx.modules.reports.dto;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 /**
@@ -30,7 +27,6 @@ public class ReportsWordTemplateParam {
     private Date createTime;
 
     @ApiModelProperty(value = "模板路径")
-    @NotEmpty
     private String templatepath;
 
     @ApiModelProperty(value = "是否在用")

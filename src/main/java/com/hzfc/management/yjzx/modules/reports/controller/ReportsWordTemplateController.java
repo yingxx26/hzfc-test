@@ -3,14 +3,9 @@ package com.hzfc.management.yjzx.modules.reports.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hzfc.management.yjzx.common.api.CommonPage;
 import com.hzfc.management.yjzx.common.api.CommonResult;
-import com.hzfc.management.yjzx.common.exception.ApiException;
 import com.hzfc.management.yjzx.modules.reports.dto.ReportsWordTemplateParam;
-import com.hzfc.management.yjzx.modules.reports.dto.WordTemplateBase64;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
-import com.hzfc.management.yjzx.modules.ums.dto.UpdateAdminPasswordParam;
-import com.hzfc.management.yjzx.modules.ums.model.UmsAdmin;
-import com.hzfc.management.yjzx.modules.ums.model.UmsRole;
 import com.hzfc.management.yjzx.modules.ums.service.UmsAdminService;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import io.swagger.annotations.Api;
@@ -24,15 +19,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.security.Principal;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.List;
 
 /**
  * word模板管理
