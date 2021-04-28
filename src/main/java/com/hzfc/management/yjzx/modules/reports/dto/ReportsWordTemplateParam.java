@@ -39,4 +39,7 @@ public class ReportsWordTemplateParam {
     @ApiModelProperty(value = "文件base64字符串")
     private String wordBase64;
 
+    @ApiModelProperty(value = "指标")
+    private String zhibiaos;
+
 }

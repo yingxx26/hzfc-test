@@ -53,4 +53,8 @@ public class ReportsWordTemplate implements Serializable {
     @TableField("INUSE")
     private Integer inuse;
 
+    @ApiModelProperty(value = "指标")
+    @TableField("ZHIBIAOS")
+    private String zhibiaos;
+
 }
