@@ -6,6 +6,7 @@ import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.dto.ReportsWordTemplateParam;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
+import com.hzfc.management.yjzx.modules.ums.service.UmsAdminService;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -125,6 +126,27 @@ public class ReportsWordTemplateController {
         return CommonResult.failed();
     }
 
+    @ApiOperation("修改指定模板")
+    @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult update(@PathVariable Long id, @Validated @RequestBody ReportsWordTemplateParam wordTemplate, Principal principal) {
+
+        String wordBase64 = wordTemplate.getWordBase64();
+        if (StringUtils.isEmpty(wordBase64)) {
+            return CommonResult.failed("请先上传图片");
+        }
+        ReportsWordTemplate reportsWordTemplate = new ReportsWordTemplate();
+        BeanUtils.copyProperties(wordTemplate, reportsWordTemplate);
+        String name = principal.getName();
+        reportsWordTemplate.setCreateuser(name);
+        reportsWordTemplate.setCreateTime(new Date());
+        boolean success = reportsWordTemplateService.updateAll(id, reportsWordTemplate, wordBase64);
+        if (success) {
+            return CommonResult.success(null);
+        } else {
+            return CommonResult.failed();
+        }
+    }
     // 文件上传 （可以多文件上传）
     /*@PostMapping("/upload")
     @ResponseBody

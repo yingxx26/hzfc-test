@@ -29,8 +29,6 @@ public class Base64FileUtil {
             byte[] bytes = new byte[(int) file.length()];
             in.read(bytes);
             base64 = Base64.getEncoder().encodeToString(bytes);
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             if (in != null) {
                 try {
@@ -43,23 +41,20 @@ public class Base64FileUtil {
         return base64;
     }
 
-    public static MultipartFile base64ToMultipart(String base64) {
-        try {
-            String[] baseStr = base64.split(",");
+    public static MultipartFile base64ToMultipart(String base64) throws IOException {
 
-            BASE64Decoder decoder = new BASE64Decoder();
-            byte[] b = new byte[0];
-            b = decoder.decodeBuffer(baseStr[1]);
-            for (int i = 0; i < b.length; ++i) {
-                if (b[i] < 0) {
-                    b[i] += 256;
-                }
+        String[] baseStr = base64.split(",");
+
+        BASE64Decoder decoder = new BASE64Decoder();
+        byte[] b = new byte[0];
+        b = decoder.decodeBuffer(baseStr[1]);
+        for (int i = 0; i < b.length; ++i) {
+            if (b[i] < 0) {
+                b[i] += 256;
             }
-            return new Base64DecodedMultipartFile(b, baseStr[0]);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
+        return new Base64DecodedMultipartFile(b, baseStr[0]);
+
     }
 
     public static class Base64DecodedMultipartFile implements MultipartFile {
@@ -108,9 +103,15 @@ public class Base64FileUtil {
 
         @Override
         public void transferTo(File dest) throws IOException, IllegalStateException {
-            new FileOutputStream(dest).write(imgContent);
+            FileOutputStream fileOutputStream = new FileOutputStream(dest);
+            try {
+                fileOutputStream.write(imgContent);
+            } finally {
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+            }
         }
-
 
     }
 

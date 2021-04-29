@@ -27,4 +27,6 @@ public interface ReportsWordTemplateService extends IService<ReportsWordTemplate
      */
     boolean delete(Long id);
 
+    public boolean updateAll(Long id, ReportsWordTemplate reportsWordTemplate, String wordBase64);
+
 }

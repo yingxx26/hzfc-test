@@ -37,13 +37,13 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     @Override
     @Transactional
     public boolean create(ReportsWordTemplate reportsWordTemplate, String wordBase64) {
+        String path = generatePath();
+        base64ToFile(path, wordBase64);
+        reportsWordTemplate.setTemplatepath(path);
+        return save(reportsWordTemplate);
+    }
 
-        ZonedDateTime now = ZonedDateTime.now();
-        // ISO_LOCAL_DATE 2020-03-25
-        String format1 = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(now);
-        // 时间 和 日期拼接
-        String newFileName = "WT" + format1 + ".docx";
-        String path = filePath + newFileName;
+    private String base64ToFile(String path, String wordBase64) {
         // 得到文件保存的位置以及新文件名
         try {
             File dest = new File(path);
@@ -62,8 +62,16 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
             LOGGER.error(e.toString());
             throw new ApiException("上传异常");
         }
-        reportsWordTemplate.setTemplatepath(path);
-        return save(reportsWordTemplate);
+        return path;
+    }
+
+    private String generatePath() {
+        ZonedDateTime now = ZonedDateTime.now();
+        // ISO_LOCAL_DATE 2020-03-25
+        String format1 = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(now);
+        // 时间 和 日期拼接
+        String newFileName = "WT" + format1 + ".docx";
+        return filePath + newFileName;
     }
 
     @Override
@@ -75,6 +83,7 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
             lambda.like(ReportsWordTemplate::getCreateuser, keyword);
             lambda.or().like(ReportsWordTemplate::getUsepurpose, keyword);
         }
+        lambda.orderByDesc(ReportsWordTemplate::getCreateTime);
         return page(page, wrapper);
     }
 
@@ -86,10 +95,29 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     }
 
     @Override
+    @Transactional
     public boolean delete(Long id) {
         ReportsWordTemplate reportsWordTemplate = getById(id);
-        DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
+        boolean delete = DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
+        if (!delete) {
+            return false;
+        }
         boolean success = removeById(id);
+        return success;
+    }
+
+    @Override
+    @Transactional
+    public boolean updateAll(Long id, ReportsWordTemplate reportsWordTemplate, String wordBase64) {
+        boolean delete = DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
+        if (!delete) {
+            return false;
+        }
+        String path = generatePath();
+        base64ToFile(path, wordBase64);
+        reportsWordTemplate.setTemplatepath(path);
+        reportsWordTemplate.setId(id);
+        boolean success = updateById(reportsWordTemplate);
         return success;
     }
 
