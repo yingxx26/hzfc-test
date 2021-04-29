@@ -6,7 +6,6 @@ import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.dto.ReportsWordTemplateParam;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
-import com.hzfc.management.yjzx.modules.ums.service.UmsAdminService;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,13 +36,11 @@ public class ReportsWordTemplateController {
     @Value("${hzfc.uploadfile.wordTemplate.path}")
     private String filePath;
 
-    @Autowired
-    private UmsAdminService adminService;
 
     @Autowired
     private ReportsWordTemplateService reportsWordTemplateService;
 
-    @ApiOperation("根据用户名或姓名分页获取用户列表")
+    @ApiOperation("根据用途或模板名分页获取模板列表")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<CommonPage<ReportsWordTemplate>> list(@RequestParam(value = "keyword", required = false) String keyword,
