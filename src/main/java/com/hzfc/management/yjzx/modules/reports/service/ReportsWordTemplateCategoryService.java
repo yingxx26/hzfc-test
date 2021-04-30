@@ -13,7 +13,6 @@ import java.util.List;
 public interface ReportsWordTemplateCategoryService extends IService<ReportsWordTemplateCategory> {
 
 
-
-    boolean update(ReportsWordTemplateCategoryParam reportsWordTemplateCategoryParam);
+    void update(ReportsWordTemplateCategoryParam reportsWordTemplateCategoryParam);
 
 }

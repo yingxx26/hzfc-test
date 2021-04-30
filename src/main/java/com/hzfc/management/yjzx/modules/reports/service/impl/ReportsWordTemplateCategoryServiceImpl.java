@@ -16,8 +16,11 @@ import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateCateg
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import com.hzfc.management.yjzx.utils.fileutils.DeleteFileUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,13 +46,21 @@ public class ReportsWordTemplateCategoryServiceImpl extends ServiceImpl<ReportsW
 
     @Override
     @Transactional
-    public boolean update(ReportsWordTemplateCategoryParam reportsWordTemplateCategoryParam) {
+    public void update(ReportsWordTemplateCategoryParam reportsWordTemplateCategoryParam) {
         List<CategoryAdd> addOrEditList = reportsWordTemplateCategoryParam.getAddOrEditList();
-        List<CategoryAdd> addList = addOrEditList.stream().filter(category -> category.getId() == null).collect(Collectors.toList());
-        List<CategoryAdd> editList = addOrEditList.stream().filter(t -> !addList.contains(t)).collect(Collectors.toList());
-
         List<Long> removeIdList = reportsWordTemplateCategoryParam.getRemoveIdList();
 
-        return false;
+        if (CollectionUtils.isNotEmpty(addOrEditList)) {
+            List<ReportsWordTemplateCategory> categoryList = addOrEditList.stream().map(category -> {
+                ReportsWordTemplateCategory reportsWordTemplateCategory = new ReportsWordTemplateCategory();
+                BeanUtils.copyProperties(category, reportsWordTemplateCategory);
+                reportsWordTemplateCategory.setCreateTime(new Date());
+                return reportsWordTemplateCategory;
+            }).collect(Collectors.toList());
+            saveOrUpdateBatch(categoryList);
+        }
+        if (CollectionUtils.isNotEmpty(removeIdList)) {
+            removeByIds(removeIdList);
+        }
     }
 }

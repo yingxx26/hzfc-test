@@ -59,7 +59,7 @@ public class ReportsWordTemplateCategoryController {
     public CommonResult update(@RequestBody ReportsWordTemplateCategoryParam reportsWordTemplateCategoryParam) {
 
         reportsWordTemplateCategoryService.update(reportsWordTemplateCategoryParam);
-        return CommonResult.success("");
+        return CommonResult.success(null);
     }
 
 }

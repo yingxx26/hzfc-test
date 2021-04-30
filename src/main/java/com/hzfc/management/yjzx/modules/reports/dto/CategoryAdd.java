@@ -26,6 +26,9 @@ public class CategoryAdd {
     @ApiModelProperty(value = "id")
     private Long id;
 
+    @ApiModelProperty(value = "父id")
+    private String parentid;
+
     @ApiModelProperty(value = "分类名称")
     private String categoryname;
 

@@ -13,9 +13,5 @@ import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
  */
 public interface ReportsWordTemplateMapper extends BaseMapper<ReportsWordTemplate> {
 
-    /**
-     * 获取资源相关用户ID列表
-     */
-    /*List<Long> getAdminIdList(@Param("resourceId") Long resourceId);*/
 
 }

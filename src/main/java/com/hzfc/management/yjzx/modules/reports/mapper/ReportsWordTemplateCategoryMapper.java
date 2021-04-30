@@ -13,9 +13,6 @@ import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplateCategor
  */
 public interface ReportsWordTemplateCategoryMapper extends BaseMapper<ReportsWordTemplateCategory> {
 
-    /**
-     * 获取资源相关用户ID列表
-     */
-    /*List<Long> getAdminIdList(@Param("resourceId") Long resourceId);*/
+
 
 }
