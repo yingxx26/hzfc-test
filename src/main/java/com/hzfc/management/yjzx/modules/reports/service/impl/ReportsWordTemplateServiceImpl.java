@@ -116,13 +116,13 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     @Override
     @Transactional
     public boolean updateAll(Long id, ReportsWordTemplate reportsWordTemplate, String wordBase64) {
-
+        String templatepath = reportsWordTemplate.getTemplatepath();
         String path = generatePath();
         base64ToFile(path, wordBase64);
         reportsWordTemplate.setTemplatepath(path);
         reportsWordTemplate.setId(id);
         boolean success = updateById(reportsWordTemplate);
-        DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
+        DeleteFileUtil.delete(templatepath);
         return success;
     }
 

@@ -1,5 +1,6 @@
 package com.hzfc.management.yjzx.utils.fileutils;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,16 +45,24 @@ public class Base64FileUtil {
     public static MultipartFile base64ToMultipart(String base64) throws IOException {
 
         String[] baseStr = base64.split(",");
-
+        String type = null;
+        String content = null;
+        if (baseStr.length < 2) {
+            type = "data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64";
+            content = baseStr[0];
+        } else {
+            type = baseStr[0];
+            content = baseStr[1];
+        }
         BASE64Decoder decoder = new BASE64Decoder();
         byte[] b = new byte[0];
-        b = decoder.decodeBuffer(baseStr[1]);
+        b = decoder.decodeBuffer(content);
         for (int i = 0; i < b.length; ++i) {
             if (b[i] < 0) {
                 b[i] += 256;
             }
         }
-        return new Base64DecodedMultipartFile(b, baseStr[0]);
+        return new Base64DecodedMultipartFile(b, type);
 
     }
 
