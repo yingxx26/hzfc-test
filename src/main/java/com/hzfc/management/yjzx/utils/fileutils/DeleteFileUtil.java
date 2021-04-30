@@ -5,6 +5,8 @@ package com.hzfc.management.yjzx.utils.fileutils;
  * @Date 2021/4/27 14:21
  */
 
+import com.hzfc.management.yjzx.common.exception.ApiException;
+
 import java.io.File;
 
 /**
@@ -18,16 +20,14 @@ public class DeleteFileUtil {
      * @param fileName 要删除的文件名
      * @return 删除成功返回true，否则返回false
      */
-    public static boolean delete(String fileName) {
+    public static void delete(String fileName) {
         File file = new File(fileName);
         if (!file.exists()) {
             System.out.println("删除文件失败:" + fileName + "不存在！");
-            return false;
+            throw new ApiException("删除文件失败:" + fileName + "不存在！");
         } else {
             if (file.isFile())
-                return deleteFile(fileName);
-            else
-                return deleteDirectory(fileName);
+                deleteFile(fileName);
         }
     }
 
@@ -37,20 +37,15 @@ public class DeleteFileUtil {
      * @param fileName 要删除的文件的文件名
      * @return 单个文件删除成功返回true，否则返回false
      */
-    public static boolean deleteFile(String fileName) {
+    public static void deleteFile(String fileName) {
         File file = new File(fileName);
         // 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
         if (file.exists() && file.isFile()) {
-            if (file.delete()) {
-                System.out.println("删除单个文件" + fileName + "成功！");
-                return true;
-            } else {
-                System.out.println("删除单个文件" + fileName + "失败！");
-                return false;
+            if (!file.delete()) {
+                throw new ApiException("删除单个文件:" + fileName + "失败！");
             }
         } else {
-            System.out.println("删除单个文件失败：" + fileName + "不存在！");
-            return false;
+            throw new ApiException("删除单个文件失败:" + fileName + "不存在！");
         }
     }
 
@@ -60,7 +55,7 @@ public class DeleteFileUtil {
      * @param dir 要删除的目录的文件路径
      * @return 目录删除成功返回true，否则返回false
      */
-    public static boolean deleteDirectory(String dir) {
+   /* public static boolean deleteDirectory(String dir) {
         // 如果dir不以文件分隔符结尾，自动添加文件分隔符
         if (!dir.endsWith(File.separator))
             dir = dir + File.separator;
@@ -100,6 +95,6 @@ public class DeleteFileUtil {
             return false;
         }
     }
-
+*/
 
 }

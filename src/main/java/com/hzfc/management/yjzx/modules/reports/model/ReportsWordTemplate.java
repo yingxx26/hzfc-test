@@ -61,5 +61,7 @@ public class ReportsWordTemplate implements Serializable {
     @TableField("CATEGORYID")
     private Long categoryid;
 
-
+    @ApiModelProperty(value = "分类id带父节点")
+    @TableField("FULLCATEGORYID")
+    private String fullcategoryid;
 }

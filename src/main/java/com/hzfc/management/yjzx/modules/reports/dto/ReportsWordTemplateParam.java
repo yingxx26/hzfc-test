@@ -41,4 +41,7 @@ public class ReportsWordTemplateParam {
 
     @ApiModelProperty(value = "分类id")
     private Long categoryid;
+
+    @ApiModelProperty(value = "分类id带父节点")
+    private String fullcategoryid;
 }

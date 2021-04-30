@@ -108,26 +108,21 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     @Transactional
     public boolean delete(Long id) {
         ReportsWordTemplate reportsWordTemplate = getById(id);
-        boolean delete = DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
-        if (!delete) {
-            return false;
-        }
         boolean success = removeById(id);
+        DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
         return success;
     }
 
     @Override
     @Transactional
     public boolean updateAll(Long id, ReportsWordTemplate reportsWordTemplate, String wordBase64) {
-        boolean delete = DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
-        if (!delete) {
-            return false;
-        }
+
         String path = generatePath();
         base64ToFile(path, wordBase64);
         reportsWordTemplate.setTemplatepath(path);
         reportsWordTemplate.setId(id);
         boolean success = updateById(reportsWordTemplate);
+        DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
         return success;
     }
 
