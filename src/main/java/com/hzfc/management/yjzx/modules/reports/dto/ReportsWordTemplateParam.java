@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户登录参数
@@ -38,4 +39,6 @@ public class ReportsWordTemplateParam {
     @ApiModelProperty(value = "指标")
     private String zhibiaos;
 
+    @ApiModelProperty(value = "分类id")
+    private Long categoryid;
 }

@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 后台管理员管理Service实现类
@@ -75,13 +78,20 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     }
 
     @Override
-    public Page<ReportsWordTemplate> list(String keyword, Integer pageSize, Integer pageNum) {
+    public Page<ReportsWordTemplate> list(String keyword, String categoryid, Integer pageSize, Integer pageNum) {
         Page<ReportsWordTemplate> page = new Page<>(pageNum, pageSize);
         QueryWrapper<ReportsWordTemplate> wrapper = new QueryWrapper<>();
         LambdaQueryWrapper<ReportsWordTemplate> lambda = wrapper.lambda();
         if (StrUtil.isNotEmpty(keyword)) {
             lambda.like(ReportsWordTemplate::getCreateuser, keyword);
             lambda.or().like(ReportsWordTemplate::getUsepurpose, keyword);
+        }
+        if (StrUtil.isNotEmpty(categoryid)) {
+           /* List<Long> ids = Arrays.stream(categoryids.split(","))
+                    .map(s -> Long.parseLong(s.trim()))
+                    .distinct().collect(Collectors.toList());
+            lambda.in(ReportsWordTemplate::getCategoryid, ids);*/
+            lambda.eq(ReportsWordTemplate::getCategoryid, categoryid);
         }
         lambda.orderByDesc(ReportsWordTemplate::getCreateTime);
         return page(page, wrapper);

@@ -13,7 +13,7 @@ public interface ReportsWordTemplateService extends IService<ReportsWordTemplate
     /**
      * 根据用户名或昵称分页查询模板
      */
-    Page<ReportsWordTemplate> list(String keyword, Integer pageSize, Integer pageNum);
+    Page<ReportsWordTemplate> list(String keyword, String categoryids, Integer pageSize, Integer pageNum);
 
     /**
      * 修改指定模板

@@ -45,9 +45,10 @@ public class ReportsWordTemplateController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<CommonPage<ReportsWordTemplate>> list(@RequestParam(value = "keyword", required = false) String keyword,
+                                                              @RequestParam(value = "categoryid", required = false) String categoryid,
                                                               @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                               @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        Page<ReportsWordTemplate> reportsWordTemplateList = reportsWordTemplateService.list(keyword, pageSize, pageNum);
+        Page<ReportsWordTemplate> reportsWordTemplateList = reportsWordTemplateService.list(keyword, categoryid, pageSize, pageNum);
         return CommonResult.success(CommonPage.restPage(reportsWordTemplateList));
     }
 
