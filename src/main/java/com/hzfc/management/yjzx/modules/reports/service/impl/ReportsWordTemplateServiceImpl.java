@@ -22,9 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 后台管理员管理Service实现类
@@ -41,7 +39,8 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     @Transactional
     public boolean create(ReportsWordTemplate reportsWordTemplate, String wordBase64) {
         String path = generatePath();
-        base64ToFile(path, wordBase64);
+        String fullpath = filePath + path;
+        base64ToFile(fullpath, wordBase64);
         reportsWordTemplate.setTemplatepath(path);
         return save(reportsWordTemplate);
     }
@@ -74,7 +73,7 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
         String format1 = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(now);
         // 时间 和 日期拼接
         String newFileName = "WT" + format1 + ".docx";
-        return filePath + newFileName;
+        return newFileName;
     }
 
     @Override
@@ -109,7 +108,7 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     public boolean delete(Long id) {
         ReportsWordTemplate reportsWordTemplate = getById(id);
         boolean success = removeById(id);
-        DeleteFileUtil.delete(reportsWordTemplate.getTemplatepath());
+        DeleteFileUtil.delete(filePath + reportsWordTemplate.getTemplatepath());
         return success;
     }
 
@@ -118,12 +117,21 @@ public class ReportsWordTemplateServiceImpl extends ServiceImpl<ReportsWordTempl
     public boolean updateAll(Long id, ReportsWordTemplate reportsWordTemplate, String wordBase64) {
         String templatepath = reportsWordTemplate.getTemplatepath();
         String path = generatePath();
-        base64ToFile(path, wordBase64);
+        String fullpath = filePath + path;
+        base64ToFile(fullpath, wordBase64);
         reportsWordTemplate.setTemplatepath(path);
         reportsWordTemplate.setId(id);
         boolean success = updateById(reportsWordTemplate);
-        DeleteFileUtil.delete(templatepath);
+        DeleteFileUtil.delete(filePath + templatepath);
         return success;
+    }
+
+    @Override
+    public List<ReportsWordTemplate> listByCategory(Long categoryid) {
+        QueryWrapper<ReportsWordTemplate> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(ReportsWordTemplate::getCategoryid, categoryid);
+        List<ReportsWordTemplate> reportsWordTemplateList = list(wrapper);
+        return reportsWordTemplateList;
     }
 
 }

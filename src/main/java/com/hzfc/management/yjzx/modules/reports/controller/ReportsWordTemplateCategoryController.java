@@ -1,34 +1,21 @@
 package com.hzfc.management.yjzx.modules.reports.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.hzfc.management.yjzx.common.api.CommonPage;
 import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.dto.ReportsWordTemplateCategoryParam;
-import com.hzfc.management.yjzx.modules.reports.dto.ReportsWordTemplateParam;
-import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplateCategory;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateCategoryService;
-import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
-import com.hzfc.management.yjzx.modules.ums.service.UmsAdminService;
-import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * word模板分类管理

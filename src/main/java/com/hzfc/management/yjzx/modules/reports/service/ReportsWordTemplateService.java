@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 
+import java.util.List;
+
 /**
  * 后台管理员管理Service
  * Created by hzfc on 2018/4/26.
@@ -28,5 +30,7 @@ public interface ReportsWordTemplateService extends IService<ReportsWordTemplate
     boolean delete(Long id);
 
     public boolean updateAll(Long id, ReportsWordTemplate reportsWordTemplate, String wordBase64);
+
+    public List<ReportsWordTemplate> listByCategory(Long categoryid);
 
 }
