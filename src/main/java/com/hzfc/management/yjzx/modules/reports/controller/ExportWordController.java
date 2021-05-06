@@ -1,6 +1,7 @@
 package com.hzfc.management.yjzx.modules.reports.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.config.Configure;
 import com.deepoove.poi.data.RowRenderData;
@@ -9,6 +10,7 @@ import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
+import com.hzfc.management.yjzx.utils.fileutils.DeleteFileUtil;
 import com.hzfc.management.yjzx.utils.fileutils.SaveFileUtil;
 import com.hzfc.management.yjzx.utils.wordutils.mergeCell3.DetailData3;
 import com.hzfc.management.yjzx.utils.wordutils.mergeCell3.DetailTablePolicy3;
@@ -27,6 +29,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 导出Word
@@ -51,50 +55,31 @@ public class ExportWordController {
     @Autowired
     private ReportsWordTemplateService reportsWordTemplateService;
 
-    /**
-     * 用户信息导出word --- poi-tl
-     *
-     * @throws IOException
-     */
-    /*@RequestMapping("/exportUserWord/{templateId}")
-    @ResponseBody
-    public CommonResult<String> exportUserWord(@PathVariable("templateId") Long templateId) {
-        Map<String, Object> params = new HashMap<>();
-        // 渲染文本
-        params.put("name", "张三");
-        params.put("position", "开发工程师");
-        params.put("entry_time", "2020-07-30");
-        params.put("province", "江苏省");
-        params.put("city", "南京市");
-        // 渲染图片
-        params.put("picture", new PictureRenderData(120, 120, "G:\\wordTest\\square.jpeg"));
-        String fileName = null;
-        try {
-            // TODO 渲染其他类型的数据请参考官方文档
-            ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(templateId);
-            String fullpath = filePath + reportsWordTemplate.getTemplatepath();
-            fileName = SaveFileUtil.savePoiFile(params, fullpath, tempfilePath);
-        } catch (Exception e) {
-            return CommonResult.failed("文件异常");
-        }
-        return CommonResult.success(fileName);
-    }*/
     @RequestMapping("/exportUserWord/{templateId}")
     @ResponseBody
     public CommonResult<String> exportUserWord(@PathVariable("templateId") Long templateId) {
-        Map<String, Object> params = new HashMap<>();
-        // 渲染文本
-        params.put("name", "张三");
-        params.put("position", "开发工程师");
-        params.put("entry_time", "2020-07-30");
-        params.put("province", "江苏省");
-        params.put("city", "南京市");
+        Map<String, String> datas = new HashMap<>();
+        // 数据库查询指标数据
+        datas.put("zhibiao1", "南京市");
+        /*datas.put("namedb", "张三");
+        datas.put("positiondb", "开发工程师");
+        datas.put("entry_timedb", "2020-07-30");
+        datas.put("provincedb", "江苏省");
+        datas.put("citydb", "南京市");*/
+        // 数据库查询指标参数
+        ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(templateId);
+        String zhibiaos = reportsWordTemplate.getZhibiaos();
+        HashMap<String, String> zhibiaoMap = Optional.ofNullable(zhibiaos).map(u -> JSONObject.parseObject(u, HashMap.class)).get();
+
+        Map<String, String> params = new HashMap<>();
+        zhibiaoMap.forEach((k, v) -> {
+            params.put(v, datas.get(k));
+        });
+
         // 渲染图片
         //params.put("picture", new PictureRenderData(100, 120, "G:\\wordTest\\square.jpeg"));
         String fileName = null;
         try {
-            // TODO 渲染其他类型的数据请参考官方文档
-            ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(templateId);
             String fullpath = filePath + reportsWordTemplate.getTemplatepath();
             fileName = SaveFileUtil.savePoiFile(params, fullpath, tempfilePath);
         } catch (Exception e) {
@@ -109,8 +94,8 @@ public class ExportWordController {
             return CommonResult.failed("文件异常");
         }
 
-        //todo 这里再删除文件
-
+        //  这里再删除文件
+        DeleteFileUtil.delete(fullpath);
         return CommonResult.success(base64);
     }
 
