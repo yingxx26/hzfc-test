@@ -29,7 +29,7 @@ public class SaveFileUtil {
      * @return
      * @throws IOException
      */
-    public static String savePoiFile(Map<String, String> params, String templatePath, String tempfilePath) throws IOException {
+    public static String savePoiFile(Map<String, Object> params, String templatePath, String tempfilePath) throws IOException {
 
         XWPFTemplate template = XWPFTemplate.compile(templatePath).render(params);
         ;//生成临时文件存放地址

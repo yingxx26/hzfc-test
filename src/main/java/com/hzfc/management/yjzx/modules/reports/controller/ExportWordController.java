@@ -2,13 +2,18 @@ package com.hzfc.management.yjzx.modules.reports.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.config.Configure;
 import com.deepoove.poi.data.RowRenderData;
 import com.deepoove.poi.data.style.TableStyle;
 import com.hzfc.management.yjzx.common.api.CommonResult;
+import com.hzfc.management.yjzx.modules.reports.dto.ExportParam;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
+import com.hzfc.management.yjzx.modules.reports.model.ZhiBiaoZzxsjgbdqk;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
+import com.hzfc.management.yjzx.modules.reports.service.ZhiBiaoZzxsjgbdqkService;
+import com.hzfc.management.yjzx.utils.dateUtils.DateUtil;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import com.hzfc.management.yjzx.utils.fileutils.DeleteFileUtil;
 import com.hzfc.management.yjzx.utils.fileutils.SaveFileUtil;
@@ -20,6 +25,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,11 +49,9 @@ public class ExportWordController {
 
 
     /////////////////////前端做成网格////////////////////////////
-// 将 yml 中的自定义配置注入到这里
     @Value("${hzfc.tempfile.word.path}")
     private String tempfilePath;
 
-    // 将 yml 中的自定义配置注入到这里
     @Value("${hzfc.uploadfile.wordTemplate.path}")
     private String filePath;
 
@@ -55,33 +59,48 @@ public class ExportWordController {
     @Autowired
     private ReportsWordTemplateService reportsWordTemplateService;
 
-    @RequestMapping("/exportUserWord/{templateId}")
+    @Autowired
+    private ZhiBiaoZzxsjgbdqkService zhiBiaoZzxsjgbdqkService;
+
+    @RequestMapping(value = "/exportUserWord/{templateId}", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult<String> exportUserWord(@PathVariable("templateId") Long templateId) {
-        Map<String, String> datas = new HashMap<>();
-        // 数据库查询指标数据
-        datas.put("zhibiao1", "南京市");
-        /*datas.put("namedb", "张三");
-        datas.put("positiondb", "开发工程师");
-        datas.put("entry_timedb", "2020-07-30");
-        datas.put("provincedb", "江苏省");
-        datas.put("citydb", "南京市");*/
-        // 数据库查询指标参数
+    public CommonResult<String> exportUserWord(@PathVariable("templateId") Long templateId, @RequestBody ExportParam exportParam) {
+
+        Map<String, Object> dataFinal = new HashMap<String, Object>();
+        List<Date> dates = exportParam.getDates();
+        if (!CollectionUtils.isEmpty(dates) && dates.size() == 2) {
+            List<String> dateList = dates.stream().map(date -> DateUtil.format(date, "yyyy-MM-dd")).collect(Collectors.toList());
+            dataFinal.put("firstDate", dateList.get(0));
+            dataFinal.put("secondDate", dateList.get(1));
+        }
+        String yyyy = DateUtil.format(new Date(), "yyyy");
+        String mm = DateUtil.format(new Date(), "MM");
+        dataFinal.put("REPORT_YYYY", yyyy);
+        dataFinal.put("REPORT_MM", mm);
+
+        QueryWrapper<ZhiBiaoZzxsjgbdqk> wrapper = new QueryWrapper<>();
+        // 数据库查询指标数据datas <db,data>
+        Map<String, Object> datas_Zzxsjgbdqkdatas = zhiBiaoZzxsjgbdqkService.getMap(wrapper);
+        Map<String, Object> data1 = new HashMap<String, Object>();
+        datas_Zzxsjgbdqkdatas.forEach((k, v) -> {
+            Optional.ofNullable(v).map(u -> data1.put("ODS_PY_ZZXSJGBDQK_MM_" + k, datas_Zzxsjgbdqkdatas.get(k)));
+        });
+        // 数据库查询指标参数zhibiaoMap <db,word>
         ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(templateId);
         String zhibiaos = reportsWordTemplate.getZhibiaos();
         HashMap<String, String> zhibiaoMap = Optional.ofNullable(zhibiaos).map(u -> JSONObject.parseObject(u, HashMap.class)).get();
 
-        Map<String, String> params = new HashMap<>();
         zhibiaoMap.forEach((k, v) -> {
-            params.put(v, datas.get(k));
+            Optional.ofNullable(v).map(u -> data1.put(v, data1.get(k)));
         });
 
         // 渲染图片
         //params.put("picture", new PictureRenderData(100, 120, "G:\\wordTest\\square.jpeg"));
+        dataFinal.putAll(data1);
         String fileName = null;
         try {
             String fullpath = filePath + reportsWordTemplate.getTemplatepath();
-            fileName = SaveFileUtil.savePoiFile(params, fullpath, tempfilePath);
+            fileName = SaveFileUtil.savePoiFile(dataFinal, fullpath, tempfilePath);
         } catch (Exception e) {
             return CommonResult.failed("文件异常");
         }
@@ -134,7 +153,7 @@ public class ExportWordController {
     }
 
     /**
-     * 销售订单信息导出word --- poi-tl（合并单元格（循环列表下的合并行）--商品订单明细、另加一个动态行表格）
+     * 信息导出word --- poi-tl（合并单元格（循环列表下的合并行）--商品订单明细、另加一个动态行表格）
      *
      * @throws IOException
      */
