@@ -149,7 +149,7 @@
         <dependency>
             <groupId>com.deepoove</groupId>
             <artifactId>poi-tl</artifactId>
-            <version>1.7.3</version>
+            <version>1.8.2</version>
         </dependency>
         <!--  上面需要的依赖-->
         <dependency>

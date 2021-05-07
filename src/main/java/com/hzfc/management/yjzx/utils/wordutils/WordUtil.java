@@ -19,16 +19,16 @@ public class WordUtil {
      * @param paramMap     替换的参数集合
      */
     public static void downloadWord(OutputStream out,String templatePath, Map<String, Object> paramMap) {
-        
+
         Long time = new Date().getTime();
         // 生成的word格式
         String formatSuffix = ".docx";
         // 拼接后的文件名
         String fileName = time + formatSuffix;
-		
+
 		//设置生成的文件存放路径，可以存放在你想要指定的路径里面
 		String rootPath="G:/wordTest/"+File.separator+"file/word/";
-		
+
 		String filePath = rootPath+fileName;
 		File newFile = new File(filePath);
 		//判断目标文件所在目录是否存在
@@ -36,7 +36,7 @@ public class WordUtil {
 			//如果目标文件所在的目录不存在，则创建父目录
 			newFile.getParentFile().mkdirs();
 		}
-    			
+
         // 读取模板templatePath并将paramMap的内容填充进模板，即编辑模板(compile)+渲染数据(render)
         XWPFTemplate template = XWPFTemplate.compile(templatePath).render(paramMap);
         try {
@@ -50,8 +50,8 @@ public class WordUtil {
             e.printStackTrace();
         }
     }
-    
+
     public static void main(String[] args) {
-        
+
     }
 }

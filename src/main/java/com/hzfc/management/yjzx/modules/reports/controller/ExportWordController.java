@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.config.Configure;
-import com.deepoove.poi.data.RowRenderData;
+import com.deepoove.poi.data.*;
 import com.deepoove.poi.data.style.TableStyle;
 import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.dto.ExportParam;
@@ -97,6 +97,7 @@ public class ExportWordController {
         // 渲染图片
         //params.put("picture", new PictureRenderData(100, 120, "G:\\wordTest\\square.jpeg"));
         dataFinal.putAll(data1);
+        this.dealChart(dataFinal);
         String fileName = null;
         try {
             String fullpath = filePath + reportsWordTemplate.getTemplatepath();
@@ -117,6 +118,118 @@ public class ExportWordController {
         DeleteFileUtil.delete(fullpath);
         return CommonResult.success(base64);
     }
+
+    private Map<String, Object> dealChart(Map<String, Object> paramMap) {
+        /* 测试表格插入---------------------------------------*/
+        //定义表格的头
+        //方式一
+        //RowRenderData headerData = RowRenderData.build("电灯名称","使用率");
+        //设置样式
+        TableStyle tStyle = new TableStyle();
+        tStyle.setBackgroundColor("87CEEB");
+        //表头方式二
+		/*RowRenderData headerData = RowRenderData.build(
+				new TextRenderData("FFFFFF","仪器名称"),new TextRenderData("FFFFFF","使用率"));*/
+        //表头方式三
+
+        List<CellRenderData> listCellRenderDatas = new ArrayList<CellRenderData>();
+        CellRenderData cellRenderData1 = new CellRenderData();
+        cellRenderData1.setCellText(new TextRenderData("000000", "电灯名称"));
+        listCellRenderDatas.add(cellRenderData1);
+        CellRenderData cellRenderData2 = new CellRenderData();
+        cellRenderData2.setCellText(new TextRenderData("000000", "使用率"));
+        listCellRenderDatas.add(cellRenderData2);
+        CellRenderData cellRenderData3 = new CellRenderData();
+        cellRenderData3.setCellText(new TextRenderData("000000", "使用年限"));
+        listCellRenderDatas.add(cellRenderData3);
+        RowRenderData headerData = new RowRenderData(listCellRenderDatas);
+        headerData.setRowStyle(tStyle);
+        headerData.setCells(listCellRenderDatas);
+
+        List<RowRenderData> listRowList = new ArrayList<RowRenderData>();
+
+        //将数据存储为了后边生成图样式
+        List<String> devname = new ArrayList<String>();
+        List<Double> useRate = new ArrayList<Double>();
+        List<Integer> useYear = new ArrayList<Integer>();
+
+        for (int i = 0; i < 5; i++) {
+
+            //生成一行数据
+            listRowList.add(RowRenderData.build("电灯_" + i, String.valueOf(Math.random() * 100) + "%", String.valueOf(i + 1)));
+
+            //存入list,为了生成图表
+            devname.add("电灯_" + i);
+            useRate.add(Math.random() * 100);
+            useYear.add(i + 1);
+        }
+        paramMap.put("table", new MiniTableRenderData(headerData, listRowList));
+
+        /* 测试图表的插入-------------------------------------*/
+        //柱状图生成
+        ChartMultiSeriesRenderData bar = new ChartMultiSeriesRenderData();
+        bar.setChartTitle("barCharts");
+        //参数为数组
+        bar.setCategories(devname.toArray(new String[devname.size()]));
+        List<SeriesRenderData> seriesRenderDatas = new ArrayList<SeriesRenderData>();
+        seriesRenderDatas.add(new SeriesRenderData("使用率", useRate.toArray(new Double[useRate.size()])));
+        seriesRenderDatas.add(new SeriesRenderData("使用年限", useYear.toArray(new Integer[useYear.size()])));
+        bar.setSeriesDatas(seriesRenderDatas);
+        paramMap.put("barCharts", bar);
+
+        //折线图生成
+        ChartMultiSeriesRenderData line = new ChartMultiSeriesRenderData();
+        line.setChartTitle("lineCharts");
+        //参数为数组
+        line.setCategories(devname.toArray(new String[devname.size()]));
+        List<SeriesRenderData> seriesRenderDatas1 = new ArrayList<SeriesRenderData>();
+        seriesRenderDatas1.add(new SeriesRenderData("使用率", useRate.toArray(new Double[useRate.size()])));
+        seriesRenderDatas1.add(new SeriesRenderData("使用年限", useYear.toArray(new Integer[useYear.size()])));
+        line.setSeriesDatas(seriesRenderDatas1);
+        paramMap.put("lineCharts", line);
+
+        //柱状图、折线图共存
+        ChartMultiSeriesRenderData barLine = new ChartMultiSeriesRenderData();
+        barLine.setChartTitle("barLineCharts");
+        barLine.setCategories(devname.toArray(new String[devname.size()]));
+
+        List<SeriesRenderData> seriesRenderDatas2 = new ArrayList<SeriesRenderData>();
+        SeriesRenderData seriesRenderData1 = new SeriesRenderData();
+        seriesRenderData1.setName("使用率bar");
+        seriesRenderData1.setValues(useRate.toArray(new Double[useRate.size()]));
+        seriesRenderData1.setComboType(SeriesRenderData.ComboType.BAR);
+        seriesRenderDatas2.add(seriesRenderData1);
+
+        SeriesRenderData seriesRenderData2 = new SeriesRenderData();
+        seriesRenderData2.setName("使用年限line");
+        seriesRenderData2.setValues(useYear.toArray(new Integer[useYear.size()]));
+        seriesRenderData2.setComboType(SeriesRenderData.ComboType.LINE);
+        seriesRenderDatas2.add(seriesRenderData2);
+
+        SeriesRenderData seriesRenderData3 = new SeriesRenderData();
+        seriesRenderData3.setName("使用率line");
+        seriesRenderData3.setValues(useRate.toArray(new Double[useRate.size()]));
+        seriesRenderData3.setComboType(SeriesRenderData.ComboType.LINE);
+        seriesRenderDatas2.add(seriesRenderData3);
+
+        SeriesRenderData seriesRenderData4 = new SeriesRenderData();
+        seriesRenderData4.setName("使用年限bar");
+        seriesRenderData4.setValues(useYear.toArray(new Integer[useYear.size()]));
+        seriesRenderData4.setComboType(SeriesRenderData.ComboType.BAR);
+        seriesRenderDatas2.add(seriesRenderData4);
+
+        barLine.setSeriesDatas(seriesRenderDatas2);
+        paramMap.put("barLineCharts", barLine);
+
+        //饼状图
+        ChartSingleSeriesRenderData pie = new ChartSingleSeriesRenderData();
+        pie.setChartTitle("饼状图");
+        pie.setCategories(devname.toArray(new String[devname.size()]));
+        pie.setSeriesData(new SeriesRenderData("电灯数量", new Integer[]{120, 25, 89, 65, 49}));
+        paramMap.put("pie", pie);
+        return paramMap;
+    }
+
 
     /**
      * 查看文件
