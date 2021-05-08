@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.config.Configure;
 import com.deepoove.poi.data.*;
+import com.deepoove.poi.data.style.Style;
 import com.deepoove.poi.data.style.TableStyle;
 import com.hzfc.management.yjzx.common.api.CommonResult;
+import com.hzfc.management.yjzx.modules.reports.dto.ExportDataPackage;
 import com.hzfc.management.yjzx.modules.reports.dto.ExportParam;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.model.ZhiBiaoZzxsjgbdqk;
@@ -78,13 +80,18 @@ public class ExportWordController {
         dataFinal.put("REPORT_YYYY", yyyy);
         dataFinal.put("REPORT_MM", mm);
 
-        QueryWrapper<ZhiBiaoZzxsjgbdqk> wrapper = new QueryWrapper<>();
-        // 数据库查询指标数据datas <db,data>
-        Map<String, Object> datas_Zzxsjgbdqkdatas = zhiBiaoZzxsjgbdqkService.getMap(wrapper);
         Map<String, Object> data1 = new HashMap<String, Object>();
+
+        // 数据库查询指标数据datas <db,data>
+        /*
+        QueryWrapper<ZhiBiaoZzxsjgbdqk> wrapper = new QueryWrapper<>();
+        Map<String, Object> datas_Zzxsjgbdqkdatas = zhiBiaoZzxsjgbdqkService.getMap(wrapper);
         datas_Zzxsjgbdqkdatas.forEach((k, v) -> {
             Optional.ofNullable(v).map(u -> data1.put("ODS_PY_ZZXSJGBDQK_MM_" + k, datas_Zzxsjgbdqkdatas.get(k)));
-        });
+        });*/
+        List<ZhiBiaoZzxsjgbdqk> list = zhiBiaoZzxsjgbdqkService.list();
+        ExportDataPackage exportDataPackage = new ExportDataPackage();
+        exportDataPackage.setZhiBiaoZzxsjgbdqkList(list);
         // 数据库查询指标参数zhibiaoMap <db,word>
         ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(templateId);
         String zhibiaos = reportsWordTemplate.getZhibiaos();
@@ -97,13 +104,14 @@ public class ExportWordController {
         // 渲染图片
         //params.put("picture", new PictureRenderData(100, 120, "G:\\wordTest\\square.jpeg"));
         dataFinal.putAll(data1);
+        this.dealTable(dataFinal, exportDataPackage);
         this.dealChart(dataFinal);
         String fileName = null;
         try {
             String fullpath = filePath + reportsWordTemplate.getTemplatepath();
             fileName = SaveFileUtil.savePoiFile(dataFinal, fullpath, tempfilePath);
         } catch (Exception e) {
-            return CommonResult.failed("文件异常");
+            return CommonResult.failed("");
         }
 
         String fullpath = tempfilePath + fileName;
@@ -119,18 +127,44 @@ public class ExportWordController {
         return CommonResult.success(base64);
     }
 
+    private Map<String, Object> dealTable(Map<String, Object> paramMap, ExportDataPackage exportDataPackage) {
+
+        TableStyle tStyle = new TableStyle();
+        tStyle.setBackgroundColor("87CEEB");
+
+        List<CellRenderData> listCellRenderDatas = new ArrayList<CellRenderData>();
+
+        CellRenderData cellRenderData1 = new CellRenderData();
+        cellRenderData1.setCellText(new TextRenderData("000000", "城市"));
+        listCellRenderDatas.add(cellRenderData1);
+        CellRenderData cellRenderData2 = new CellRenderData();
+        cellRenderData2.setCellText(new TextRenderData("000000", "环比"));
+        listCellRenderDatas.add(cellRenderData2);
+        CellRenderData cellRenderData3 = new CellRenderData();
+        cellRenderData3.setCellText(new TextRenderData("000000", "同比"));
+        listCellRenderDatas.add(cellRenderData3);
+
+        RowRenderData headerData = new RowRenderData(listCellRenderDatas);
+        headerData.setRowStyle(tStyle);
+        headerData.setCells(listCellRenderDatas);
+
+        List<ZhiBiaoZzxsjgbdqk> zhiBiaoZzxsjgbdqkList = exportDataPackage.getZhiBiaoZzxsjgbdqkList();
+        List<RowRenderData> listRowList = new ArrayList<RowRenderData>();
+        for (ZhiBiaoZzxsjgbdqk zhiBiaoZzxsjgbdqk : zhiBiaoZzxsjgbdqkList) {
+            listRowList.add(RowRenderData.build(zhiBiaoZzxsjgbdqk.getCity(),
+                    String.valueOf(zhiBiaoZzxsjgbdqk.getMom()),
+                    String.valueOf(zhiBiaoZzxsjgbdqk.getYoy())));
+        }
+        paramMap.put("tableTemplate", new MiniTableRenderData(headerData, listRowList));
+        return paramMap;
+    }
+
     private Map<String, Object> dealChart(Map<String, Object> paramMap) {
         /* 测试表格插入---------------------------------------*/
         //定义表格的头
-        //方式一
-        //RowRenderData headerData = RowRenderData.build("电灯名称","使用率");
         //设置样式
-        TableStyle tStyle = new TableStyle();
+        /*TableStyle tStyle = new TableStyle();
         tStyle.setBackgroundColor("87CEEB");
-        //表头方式二
-		/*RowRenderData headerData = RowRenderData.build(
-				new TextRenderData("FFFFFF","仪器名称"),new TextRenderData("FFFFFF","使用率"));*/
-        //表头方式三
 
         List<CellRenderData> listCellRenderDatas = new ArrayList<CellRenderData>();
         CellRenderData cellRenderData1 = new CellRenderData();
@@ -144,9 +178,9 @@ public class ExportWordController {
         listCellRenderDatas.add(cellRenderData3);
         RowRenderData headerData = new RowRenderData(listCellRenderDatas);
         headerData.setRowStyle(tStyle);
-        headerData.setCells(listCellRenderDatas);
+        headerData.setCells(listCellRenderDatas);*/
 
-        List<RowRenderData> listRowList = new ArrayList<RowRenderData>();
+        //List<RowRenderData> listRowList = new ArrayList<RowRenderData>();
 
         //将数据存储为了后边生成图样式
         List<String> devname = new ArrayList<String>();
@@ -156,19 +190,19 @@ public class ExportWordController {
         for (int i = 0; i < 5; i++) {
 
             //生成一行数据
-            listRowList.add(RowRenderData.build("电灯_" + i, String.valueOf(Math.random() * 100) + "%", String.valueOf(i + 1)));
+            //listRowList.add(RowRenderData.build("电灯_" + i, String.valueOf(Math.random() * 100) + "%", String.valueOf(i + 1)));
 
             //存入list,为了生成图表
             devname.add("电灯_" + i);
             useRate.add(Math.random() * 100);
             useYear.add(i + 1);
         }
-        paramMap.put("table", new MiniTableRenderData(headerData, listRowList));
+        //paramMap.put("tableTemplate", new MiniTableRenderData(headerData, listRowList));
 
         /* 测试图表的插入-------------------------------------*/
         //柱状图生成
         ChartMultiSeriesRenderData bar = new ChartMultiSeriesRenderData();
-        bar.setChartTitle("barCharts");
+        bar.setChartTitle("柱状图");
         //参数为数组
         bar.setCategories(devname.toArray(new String[devname.size()]));
         List<SeriesRenderData> seriesRenderDatas = new ArrayList<SeriesRenderData>();
@@ -176,6 +210,8 @@ public class ExportWordController {
         seriesRenderDatas.add(new SeriesRenderData("使用年限", useYear.toArray(new Integer[useYear.size()])));
         bar.setSeriesDatas(seriesRenderDatas);
         paramMap.put("barCharts", bar);
+
+        paramMap.put("qsxjspzfydcjts", bar);
 
         //折线图生成
         ChartMultiSeriesRenderData line = new ChartMultiSeriesRenderData();

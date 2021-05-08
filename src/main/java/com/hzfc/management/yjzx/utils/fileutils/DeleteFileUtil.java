@@ -21,13 +21,17 @@ public class DeleteFileUtil {
      * @return 删除成功返回true，否则返回false
      */
     public static void delete(String fileName) {
-        File file = new File(fileName);
-        if (!file.exists()) {
-            System.out.println("删除文件失败:" + fileName + "不存在！");
-            throw new ApiException("删除文件失败:" + fileName + "不存在！");
-        } else {
-            if (file.isFile())
-                deleteFile(fileName);
+        try {
+            File file = new File(fileName);
+            if (!file.exists()) {
+                System.out.println("删除文件失败:" + fileName + "不存在！");
+                throw new ApiException("删除文件失败:" + fileName + "不存在！");
+            } else {
+                if (file.isFile())
+                    deleteFile(fileName);
+            }
+        } catch (Exception e) {
+            System.out.println("删除文件失败");
         }
     }
 
