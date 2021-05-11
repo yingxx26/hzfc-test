@@ -1,13 +1,11 @@
 package com.hzfc.management.yjzx.modules.reports.controller;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.deepoove.poi.XWPFTemplate;
-import com.deepoove.poi.config.Configure;
 import com.deepoove.poi.data.*;
-import com.deepoove.poi.data.style.Style;
-import com.deepoove.poi.data.style.TableStyle;
 import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.dto.ExportDataPackage;
 import com.hzfc.management.yjzx.modules.reports.dto.ExportParam;
@@ -19,26 +17,16 @@ import com.hzfc.management.yjzx.utils.dateUtils.DateUtil;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import com.hzfc.management.yjzx.utils.fileutils.DeleteFileUtil;
 import com.hzfc.management.yjzx.utils.fileutils.SaveFileUtil;
-import com.hzfc.management.yjzx.utils.wordutils.mergeCell3.DetailData3;
-import com.hzfc.management.yjzx.utils.wordutils.mergeCell3.DetailTablePolicy3;
-import com.hzfc.management.yjzx.utils.wordutils.mergeCell3.DetailTablePolicy4;
 import io.swagger.annotations.ApiOperation;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 导出Word
@@ -57,6 +45,8 @@ public class ExportWordController {
     @Value("${hzfc.uploadfile.wordTemplate.path}")
     private String filePath;
 
+    @Value("${hzfc.zhibiao.city}")
+    private String city;
 
     @Autowired
     private ReportsWordTemplateService reportsWordTemplateService;
@@ -75,20 +65,27 @@ public class ExportWordController {
             dataFinal.put("firstDate", dateList.get(0));
             dataFinal.put("secondDate", dateList.get(1));
         }
-        String yyyy = DateUtil.format(new Date(), "yyyy");
-        String mm = DateUtil.format(new Date(), "MM");
-        dataFinal.put("REPORT_YYYY", yyyy);
-        dataFinal.put("REPORT_MM", mm);
 
+        LocalDateTime localDateTime = LocalDateTime.now().plusDays(1);
+        String lastMM = localDateTime.format(DateTimeFormatter.ofPattern("MM"));
+        dataFinal.put("lastMonth", lastMM);
         Map<String, Object> data1 = new HashMap<String, Object>();
 
         // 数据库查询指标数据datas <db,data>
-        /*
         QueryWrapper<ZhiBiaoZzxsjgbdqk> wrapper = new QueryWrapper<>();
-        Map<String, Object> datas_Zzxsjgbdqkdatas = zhiBiaoZzxsjgbdqkService.getMap(wrapper);
-        datas_Zzxsjgbdqkdatas.forEach((k, v) -> {
-            Optional.ofNullable(v).map(u -> data1.put("ODS_PY_ZZXSJGBDQK_MM_" + k, datas_Zzxsjgbdqkdatas.get(k)));
-        });*/
+        LambdaQueryWrapper<ZhiBiaoZzxsjgbdqk> lambda = wrapper.lambda();
+        List<String> cities = Arrays.asList(city.split(","));
+        lambda.in((ZhiBiaoZzxsjgbdqk::getCity), cities);
+        List<Map<String, Object>> listmaps = zhiBiaoZzxsjgbdqkService.listMaps(wrapper);
+        Optional<Map<String, Object>> first = listmaps.stream().filter(city -> city.get("CITY").equals("杭　　州")).findFirst();
+
+        if (first.isPresent()) {
+            Map<String, Object> datas_Zzxsjgbdqkdata_hz = first.get();
+            datas_Zzxsjgbdqkdata_hz.forEach((k, v) -> {
+                Optional.ofNullable(v).map(u -> data1.put("ODS_PY_ZZXSJGBDQK_MM_" + k, datas_Zzxsjgbdqkdata_hz.get(k)));
+            });
+        }
+
         List<ZhiBiaoZzxsjgbdqk> list = zhiBiaoZzxsjgbdqkService.list();
         ExportDataPackage exportDataPackage = new ExportDataPackage();
         exportDataPackage.setZhiBiaoZzxsjgbdqkList(list);
@@ -104,7 +101,7 @@ public class ExportWordController {
         // 渲染图片
         //params.put("picture", new PictureRenderData(100, 120, "G:\\wordTest\\square.jpeg"));
         dataFinal.putAll(data1);
-        this.dealTable(dataFinal, exportDataPackage);
+        this.dealTabletest(dataFinal, exportDataPackage);
         this.dealChart(dataFinal);
         String fileName = null;
         try {
@@ -127,60 +124,37 @@ public class ExportWordController {
         return CommonResult.success(base64);
     }
 
-    private Map<String, Object> dealTable(Map<String, Object> paramMap, ExportDataPackage exportDataPackage) {
+    private Map<String, Object> dealTabletest(Map<String, Object> paramMap, ExportDataPackage exportDataPackage) {
 
-        TableStyle tStyle = new TableStyle();
-        tStyle.setBackgroundColor("87CEEB");
+        RowRenderData row0 = Rows.of("城区", "登记项目及登记户数", null, null, "项目流摇情况", null, null, "平均中签率")
+                .center().horizontalCenter().textFontSize(8).textColor("FFFFFF").bgColor("4472C4").create();
+        RowRenderData row1 = Rows.of(null, "核发预售证次数", "房源", "报名登记", "摇号次数", "流摇次数", "流摇比例", null)
+                .center().horizontalCenter().textFontSize(8).textColor("FFFFFF").bgColor("4472C4").create();
+        RowRenderData row2 = Rows.of(null, null, "(套)", "(户)", null, null, null, null)
+                .center().horizontalCenter().textFontSize(8).textColor("FFFFFF").bgColor("4472C4").create();
 
-        List<CellRenderData> listCellRenderDatas = new ArrayList<CellRenderData>();
+        MergeCellRule rule = MergeCellRule.builder()
+                .map(MergeCellRule.Grid.of(0, 1), MergeCellRule.Grid.of(0, 3))
+                .map(MergeCellRule.Grid.of(0, 4), MergeCellRule.Grid.of(0, 6))
+                .map(MergeCellRule.Grid.of(0, 0), MergeCellRule.Grid.of(2, 0))
+                .map(MergeCellRule.Grid.of(1, 1), MergeCellRule.Grid.of(2, 1))
+                .map(MergeCellRule.Grid.of(1, 4), MergeCellRule.Grid.of(2, 4))
+                .map(MergeCellRule.Grid.of(1, 5), MergeCellRule.Grid.of(2, 5))
+                .map(MergeCellRule.Grid.of(1, 6), MergeCellRule.Grid.of(2, 6))
+                .map(MergeCellRule.Grid.of(0, 7), MergeCellRule.Grid.of(2, 7))
+                .build();
+        List<RowRenderData> listCellRenderDatas = new ArrayList<RowRenderData>();
+        listCellRenderDatas.add(row0);
+        listCellRenderDatas.add(row1);
+        listCellRenderDatas.add(row2);
+        RowRenderData[] rowRenderData = listCellRenderDatas.stream().toArray(RowRenderData[]::new);
+        paramMap.put("tableTemplate", Tables.of(rowRenderData).mergeRule(rule).create());
 
-        CellRenderData cellRenderData1 = new CellRenderData();
-        cellRenderData1.setCellText(new TextRenderData("000000", "城市"));
-        listCellRenderDatas.add(cellRenderData1);
-        CellRenderData cellRenderData2 = new CellRenderData();
-        cellRenderData2.setCellText(new TextRenderData("000000", "环比"));
-        listCellRenderDatas.add(cellRenderData2);
-        CellRenderData cellRenderData3 = new CellRenderData();
-        cellRenderData3.setCellText(new TextRenderData("000000", "同比"));
-        listCellRenderDatas.add(cellRenderData3);
-
-        RowRenderData headerData = new RowRenderData(listCellRenderDatas);
-        headerData.setRowStyle(tStyle);
-        headerData.setCells(listCellRenderDatas);
-
-        List<ZhiBiaoZzxsjgbdqk> zhiBiaoZzxsjgbdqkList = exportDataPackage.getZhiBiaoZzxsjgbdqkList();
-        List<RowRenderData> listRowList = new ArrayList<RowRenderData>();
-        for (ZhiBiaoZzxsjgbdqk zhiBiaoZzxsjgbdqk : zhiBiaoZzxsjgbdqkList) {
-            listRowList.add(RowRenderData.build(zhiBiaoZzxsjgbdqk.getCity(),
-                    String.valueOf(zhiBiaoZzxsjgbdqk.getMom()),
-                    String.valueOf(zhiBiaoZzxsjgbdqk.getYoy())));
-        }
-        paramMap.put("tableTemplate", new MiniTableRenderData(headerData, listRowList));
         return paramMap;
     }
 
+
     private Map<String, Object> dealChart(Map<String, Object> paramMap) {
-        /* 测试表格插入---------------------------------------*/
-        //定义表格的头
-        //设置样式
-        /*TableStyle tStyle = new TableStyle();
-        tStyle.setBackgroundColor("87CEEB");
-
-        List<CellRenderData> listCellRenderDatas = new ArrayList<CellRenderData>();
-        CellRenderData cellRenderData1 = new CellRenderData();
-        cellRenderData1.setCellText(new TextRenderData("000000", "电灯名称"));
-        listCellRenderDatas.add(cellRenderData1);
-        CellRenderData cellRenderData2 = new CellRenderData();
-        cellRenderData2.setCellText(new TextRenderData("000000", "使用率"));
-        listCellRenderDatas.add(cellRenderData2);
-        CellRenderData cellRenderData3 = new CellRenderData();
-        cellRenderData3.setCellText(new TextRenderData("000000", "使用年限"));
-        listCellRenderDatas.add(cellRenderData3);
-        RowRenderData headerData = new RowRenderData(listCellRenderDatas);
-        headerData.setRowStyle(tStyle);
-        headerData.setCells(listCellRenderDatas);*/
-
-        //List<RowRenderData> listRowList = new ArrayList<RowRenderData>();
 
         //将数据存储为了后边生成图样式
         List<String> devname = new ArrayList<String>();
@@ -188,16 +162,11 @@ public class ExportWordController {
         List<Integer> useYear = new ArrayList<Integer>();
 
         for (int i = 0; i < 5; i++) {
-
-            //生成一行数据
-            //listRowList.add(RowRenderData.build("电灯_" + i, String.valueOf(Math.random() * 100) + "%", String.valueOf(i + 1)));
-
             //存入list,为了生成图表
             devname.add("电灯_" + i);
             useRate.add(Math.random() * 100);
             useYear.add(i + 1);
         }
-        //paramMap.put("tableTemplate", new MiniTableRenderData(headerData, listRowList));
 
         /* 测试图表的插入-------------------------------------*/
         //柱状图生成
@@ -301,109 +270,4 @@ public class ExportWordController {
         return CommonResult.failed();
     }
 
-    /**
-     * 信息导出word --- poi-tl（合并单元格（循环列表下的合并行）--商品订单明细、另加一个动态行表格）
-     *
-     * @throws IOException
-     */
-    @RequestMapping("/exportDataWord8")
-    public void exportDataWord8(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            Map<String, Object> params = new HashMap<>();
-
-            // TODO 渲染其他类型的数据请参考官方文档
-
-            String basePath = ClassUtils.getDefaultClassLoader().getResource("").getPath() + "static/template/";
-            String resource = basePath + "order6.docx";//word模板地址
-
-            // PaymentData3 datas = new PaymentData3();
-
-            Map datas = new HashMap();
-
-            TableStyle rowStyle = new TableStyle();
-            rowStyle = new TableStyle();
-            rowStyle.setAlign(STJc.CENTER);
-            //组装循环体
-            List<Map<String, Object>> typeLists = new ArrayList<Map<String, Object>>();
-            List<Map<String, Object>> typeTotalList = new ArrayList<Map<String, Object>>();
-            for (int x = 0; x < 3; x++) {
-                DetailData3 detailTable = new DetailData3();
-                List<RowRenderData> plists = new ArrayList<RowRenderData>();
-                for (int i = 0; i < 6; i++) {
-                    String typeName = "二级分类1" + x;
-                    if (i == 3 || i == 4) {
-                        typeName = "二级分类2" + x;
-                    } else if (i == 5) {
-                        typeName = "二级分类3" + x;
-                    }
-                    String index = String.valueOf(i + 1);
-                    RowRenderData plist = RowRenderData.build(index, typeName, "商品" + i, "套", "2", "100", "技术参数" + i);
-                    plist.setRowStyle(rowStyle);
-                    plists.add(plist);
-
-                }
-                //二级分类 分组统计   商品个数
-                List<Map<String, Object>> tlists = new ArrayList<Map<String, Object>>();
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put("typeName", "二级分类1" + x);
-                map.put("listSize", "3");
-                tlists.add(map);
-                map = new HashMap<String, Object>();
-                map.put("typeName", "二级分类2" + x);
-                map.put("listSize", "2");
-                tlists.add(map);
-                map = new HashMap<String, Object>();
-                map.put("typeName", "二级分类3" + x);
-                map.put("listSize", "1");
-                tlists.add(map);
-
-
-                detailTable.setPlists(plists);
-                detailTable.setTlists(tlists);
-                Map<String, Object> data = new HashMap<String, Object>();
-                data.put("detail_table", detailTable);
-                data.put("index", x + 1);
-                data.put("sub_type", "大类" + x);
-                data.put("total_price", 100 + x);
-                typeLists.add(data);
-            }
-            /*datas.setTypeLists(typeLists);
-            datas.setOrder_money("100");
-            datas.setMoney_total("壹佰元整");*/
-            datas.put("typeLists", typeLists);
-            datas.put("order_money", "100");
-            datas.put("money_total", "壹佰元整");
-
-            Configure config = Configure.newBuilder().bind("detail_table", new DetailTablePolicy3())
-                    .bind("typeLists", new DetailTablePolicy4()).build();
-
-            XWPFTemplate template = XWPFTemplate.compile(resource, config).render(datas);
-
-            //=================生成文件保存在本地D盘某目录下=================
-            String temDir = "G:/wordTest/" + File.separator + "file/word/";
-            ;//生成临时文件存放地址
-            //生成文件名
-            Long time = new Date().getTime();
-            // 生成的word格式
-            String formatSuffix = ".docx";
-            // 拼接后的文件名
-            String fileName = time + formatSuffix;//文件名  带后缀
-
-            FileOutputStream fos = new FileOutputStream(temDir + fileName);
-            template.write(fos);
-            //=================生成word到设置浏览默认下载地址=================
-            // 设置强制下载不打开
-            response.setContentType("application/force-download");
-            // 设置文件名
-            response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
-            OutputStream out = response.getOutputStream();
-            template.write(out);
-            out.flush();
-            out.close();
-            template.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 }
