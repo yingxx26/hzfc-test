@@ -21,6 +21,6 @@ hzfc:
   uploadfile:
     wordTemplate:
       path: G:/wordTest/uploadfile/wordTemplate/
-  tempfile:
+  temporaryfile:
     word:
       path: G:/wordTest/file/word/

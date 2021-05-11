@@ -35,11 +35,7 @@ public class ReportsWordTemplateController {
 
     // 将 yml 中的自定义配置注入到这里
     @Value("${hzfc.uploadfile.wordTemplate.path}")
-    private String filePath;
-
-    // 将 yml 中的自定义配置注入到这里
-    @Value("${hzfc.tempfile.word.path}")
-    private String tempfilePath;
+    private String templatePath;
 
     @Autowired
     private ReportsWordTemplateService reportsWordTemplateService;
@@ -110,7 +106,7 @@ public class ReportsWordTemplateController {
         }
         String base64 = null;
         try {
-            base64 = Base64FileUtil.fileToBase64(filePath + templatepath);
+            base64 = Base64FileUtil.fileToBase64(templatePath + templatepath);
         } catch (Exception e) {
             return CommonResult.failed("文件异常");
         }

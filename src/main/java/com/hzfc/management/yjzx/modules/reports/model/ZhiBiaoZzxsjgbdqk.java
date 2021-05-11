@@ -26,7 +26,7 @@ public class ZhiBiaoZzxsjgbdqk implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "ID", type = IdType.INPUT)
-    private Long id;
+    private String id;
 
     @ApiModelProperty(value = "标题")
     @TableField("TITLE")
@@ -50,7 +50,7 @@ public class ZhiBiaoZzxsjgbdqk implements Serializable {
 
     @ApiModelProperty(value = "定基")
     @TableField("FIXEDBASE")
-    private Long FIXEDBASE;
+    private Long fixedbase;
 
     @ApiModelProperty(value = "类别")
     @TableField("LB")
