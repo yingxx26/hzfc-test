@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -21,7 +22,7 @@ import java.util.List;
 public class ExportDataPackage {
 
 
-    List<ZhiBiaoZzxsjgbdqk> zhiBiaoZzxsjgbdqkList;
+    List<ZhiBiaoZzxsjgbdqkVo> zhiBiaoZzxsjgbdqkList;
 
-
+    Map rankMap;
 }

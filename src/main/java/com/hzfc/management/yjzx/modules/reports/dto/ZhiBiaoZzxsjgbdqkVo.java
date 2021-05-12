@@ -27,12 +27,14 @@ public class ZhiBiaoZzxsjgbdqkVo implements Serializable {
 
     private String city;
 
-    private Long mom;
+    private Double mom;
 
-    private Long yoy;
+    private Double yoy;
 
-    private Long momLj;
+    private Double momLj;
 
-    private Long yoyPj;
+    private Double yoyPj;
+
+    private Double fixedbase;
 
 }

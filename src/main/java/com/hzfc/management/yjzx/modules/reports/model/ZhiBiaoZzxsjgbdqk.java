@@ -42,15 +42,15 @@ public class ZhiBiaoZzxsjgbdqk implements Serializable {
 
     @ApiModelProperty(value = "环比")
     @TableField("MOM")
-    private Long mom;
+    private Double mom;
 
     @ApiModelProperty(value = "同比")
     @TableField("YOY")
-    private Long yoy;
+    private Double yoy;
 
     @ApiModelProperty(value = "定基")
     @TableField("FIXEDBASE")
-    private Long fixedbase;
+    private Double fixedbase;
 
     @ApiModelProperty(value = "类别")
     @TableField("LB")
