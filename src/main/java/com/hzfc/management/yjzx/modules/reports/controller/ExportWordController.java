@@ -79,7 +79,7 @@ public class ExportWordController {
 
         String year = last.format(DateTimeFormatter.ofPattern("yyyy"));
         String lastMM = last.format(DateTimeFormatter.ofPattern("MM"));
-        dataFinal.put("lastMonth", lastMM);
+        dataFinal.put("lastMonth", Integer.parseInt(lastMM));
         dataFinal.put("year", year);
         Map<String, Object> data_zhiBiaoZzxsjgbdqk = new HashMap<String, Object>();
 
@@ -152,12 +152,12 @@ public class ExportWordController {
 
         //计算排名
         List<ZhiBiaoZzxsjgbdqkVo> sortedMomObjList = finalList.stream()
-                .sorted(Comparator.comparing(ZhiBiaoZzxsjgbdqkVo::getMom).thenComparing(ZhiBiaoZzxsjgbdqkVo::getYoy))
+                .sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getMom).reversed().thenComparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoy))
                 .collect(Collectors.toList());
-        List<String> sortedMomList = finalList.stream().sorted(Comparator.comparing(ZhiBiaoZzxsjgbdqkVo::getMom).thenComparing(ZhiBiaoZzxsjgbdqkVo::getYoy)).map(x -> x.getCity()).collect(Collectors.toList());
-        List<String> sortedYoyList = finalList.stream().sorted(Comparator.comparing(ZhiBiaoZzxsjgbdqkVo::getYoy)).map(x -> x.getCity()).collect(Collectors.toList());
-        List<String> sortedMomLjList = finalList.stream().sorted(Comparator.comparing(ZhiBiaoZzxsjgbdqkVo::getMomLj)).map(x -> x.getCity()).collect(Collectors.toList());
-        List<String> sortedYoyPjList = finalList.stream().sorted(Comparator.comparing(ZhiBiaoZzxsjgbdqkVo::getYoyPj)).map(x -> x.getCity()).collect(Collectors.toList());
+        List<String> sortedMomList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getMom).reversed().thenComparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoy)).map(x -> x.getCity()).collect(Collectors.toList());
+        List<String> sortedYoyList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoy).reversed()).map(x -> x.getCity()).collect(Collectors.toList());
+        List<String> sortedMomLjList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getMomLj).reversed()).map(x -> x.getCity()).collect(Collectors.toList());
+        List<String> sortedYoyPjList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoyPj).reversed()).map(x -> x.getCity()).collect(Collectors.toList());
 
 
         Map rankMap = new HashMap();
