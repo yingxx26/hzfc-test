@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.deepoove.poi.data.*;
 import com.hzfc.management.yjzx.common.api.CommonResult;
-import com.hzfc.management.yjzx.modules.reports.dto.ExportDataPackage;
-import com.hzfc.management.yjzx.modules.reports.dto.ExportParam;
-import com.hzfc.management.yjzx.modules.reports.dto.Rank;
-import com.hzfc.management.yjzx.modules.reports.dto.ZhiBiaoZzxsjgbdqkVo;
+import com.hzfc.management.yjzx.modules.reports.dto.*;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
 import com.hzfc.management.yjzx.modules.reports.model.ZhiBiaoZzxsjgbdqk;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
@@ -25,12 +22,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 导出Word
@@ -161,10 +156,10 @@ public class ExportWordController {
 
 
         Map rankMap = new HashMap();
-        int momRank = sortedMomList.indexOf(hz);
-        int yoyRank = sortedYoyList.indexOf(hz);
-        int momLjRank = sortedMomLjList.indexOf(hz);
-        int yoyPjank = sortedYoyPjList.indexOf(hz);
+        int momRank = sortedMomList.indexOf(hz) + 1;
+        int yoyRank = sortedYoyList.indexOf(hz) + 1;
+        int momLjRank = sortedMomLjList.indexOf(hz) + 1;
+        int yoyPjank = sortedYoyPjList.indexOf(hz) + 1;
         rankMap.put("momRank", momRank);
         rankMap.put("yoyRank", yoyRank);
         rankMap.put("momLjRank", momLjRank);
@@ -179,6 +174,26 @@ public class ExportWordController {
         //渲染图表
         this.dealChart(dataFinal);
 
+
+        //渲染 数组
+        List<ZhiBiaoZzxsjgbdqk> zhiBiaoZzxsjgbdqks_hz = maplist.get(hz);
+        List<Double> zhiBiaoZzxsjgbdqks_hz_sortedList = zhiBiaoZzxsjgbdqks_hz.stream().sorted(Comparator.comparing(ZhiBiaoZzxsjgbdqk::getTitle)).map(x ->
+                x.getMom()
+        ).collect(Collectors.toList());
+
+        List<Map<String, String>> hbList = new ArrayList<Map<String, String>>();
+        for (int i = 0; i < zhiBiaoZzxsjgbdqks_hz_sortedList.size(); i++) {
+            Double aDouble = zhiBiaoZzxsjgbdqks_hz_sortedList.get(i);
+            Map<String, String> map = new HashMap<String, String>();
+            if (i == 0) {
+                map.put("date", "" + aDouble);
+            } else {
+                map.put("date", "," + aDouble);
+            }
+            hbList.add(map);
+        }
+
+        dataFinal.put("hbList", hbList);
         try {
             String fullTemplatePath = templatePath + reportsWordTemplate.getTemplatepath();
             String fileName = SaveFileUtil.savePoiFile(dataFinal, fullTemplatePath, temporaryPath);
