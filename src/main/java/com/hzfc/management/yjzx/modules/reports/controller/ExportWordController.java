@@ -76,6 +76,22 @@ public class ExportWordController {
         String lastMM = last.format(DateTimeFormatter.ofPattern("MM"));
         dataFinal.put("lastMonth", Integer.parseInt(lastMM));
         dataFinal.put("year", year);
+        showSpf(templateId, dataFinal, last);
+        ReportsWordTemplate reportsWordTemplate = showClf(templateId, dataFinal, last);
+        try {
+            String fullTemplatePath = templatePath + reportsWordTemplate.getTemplatepath();
+            String fileName = SaveFileUtil.savePoiFile(dataFinal, fullTemplatePath, temporaryPath);
+            String fullTemporaryPath = temporaryPath + fileName;
+            String base64 = Base64FileUtil.fileToBase64(fullTemporaryPath);
+            //  这里再删除文件
+            DeleteFileUtil.delete(fullTemporaryPath);
+            return CommonResult.success(base64);
+        } catch (Exception e) {
+            return CommonResult.failed("文件异常");
+        }
+    }
+
+    private ReportsWordTemplate showSpf(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
         Map<String, Object> data_zhiBiaoZzxsjgbdqk = new HashMap<String, Object>();
 
         // 数据库查询城市指标数据data1 <db,data>
@@ -89,7 +105,7 @@ public class ExportWordController {
         Map<String, Object> datas_Zzxsjgbdqkdata_hz = zhiBiaoZzxsjgbdqkService.getMap(wrapper);
         if (!CollectionUtils.isEmpty(datas_Zzxsjgbdqkdata_hz)) {
             datas_Zzxsjgbdqkdata_hz.forEach((k, v) -> {
-                Optional.ofNullable(v).map(u -> data_zhiBiaoZzxsjgbdqk.put("ODS_PY_ZZXSJGBDQK_MM_" + k, datas_Zzxsjgbdqkdata_hz.get(k)));
+                Optional.ofNullable(v).map(u -> data_zhiBiaoZzxsjgbdqk.put("SPF_ODS_PY_ZZXSJGBDQK_MM_" + k, datas_Zzxsjgbdqkdata_hz.get(k)));
             });
         }
         // 数据库查询word模板指标参数zhibiaoMap <db,word>
@@ -142,8 +158,8 @@ public class ExportWordController {
             zbvo.setMomLj(Double.valueOf(dataHbljMap.get(zb.getCity())));
             return zbvo;
         }).collect(Collectors.toList());
-        dataFinal.put("tbpj", dataTbpjMap.get(hz));
-        dataFinal.put("hblj", dataHbljMap.get(hz));
+        dataFinal.put("spf_tbpj", dataTbpjMap.get(hz));
+        dataFinal.put("spf_hblj", dataHbljMap.get(hz));
 
         //计算排名
         List<ZhiBiaoZzxsjgbdqkVo> sortedMomObjList = finalList.stream()
@@ -160,17 +176,17 @@ public class ExportWordController {
         int yoyRank = sortedYoyList.indexOf(hz) + 1;
         int momLjRank = sortedMomLjList.indexOf(hz) + 1;
         int yoyPjank = sortedYoyPjList.indexOf(hz) + 1;
-        rankMap.put("momRank", momRank);
-        rankMap.put("yoyRank", yoyRank);
-        rankMap.put("momLjRank", momLjRank);
-        rankMap.put("yoyPjank", yoyPjank);
+        rankMap.put("spf_momRank", momRank);
+        rankMap.put("spf_yoyRank", yoyRank);
+        rankMap.put("spf_momLjRank", momLjRank);
+        rankMap.put("spf_yoyPjank", yoyPjank);
         dataFinal.putAll(rankMap);
 
         ExportDataPackage exportDataPackage = new ExportDataPackage();
         exportDataPackage.setZhiBiaoZzxsjgbdqkList(sortedMomObjList);
         exportDataPackage.setRankMap(rankMap);
         //渲染表格
-        this.dealTabletest(dataFinal, exportDataPackage);
+        this.dealTableSpf(dataFinal, exportDataPackage);
         //渲染图表
         this.dealChart(dataFinal);
 
@@ -186,28 +202,141 @@ public class ExportWordController {
             Double aDouble = zhiBiaoZzxsjgbdqks_hz_sortedList.get(i);
             Map<String, String> map = new HashMap<String, String>();
             if (i == 0) {
-                map.put("date", "" + aDouble);
+                map.put("spfdate", "" + aDouble);
             } else {
-                map.put("date", "," + aDouble);
+                map.put("spfdate", "," + aDouble);
             }
             hbList.add(map);
         }
 
-        dataFinal.put("hbList", hbList);
-        try {
-            String fullTemplatePath = templatePath + reportsWordTemplate.getTemplatepath();
-            String fileName = SaveFileUtil.savePoiFile(dataFinal, fullTemplatePath, temporaryPath);
-            String fullTemporaryPath = temporaryPath + fileName;
-            String base64 = Base64FileUtil.fileToBase64(fullTemporaryPath);
-            //  这里再删除文件
-            DeleteFileUtil.delete(fullTemporaryPath);
-            return CommonResult.success(base64);
-        } catch (Exception e) {
-            return CommonResult.failed("文件异常");
-        }
+        dataFinal.put("spfHbList", hbList);
+        return reportsWordTemplate;
     }
 
-    private Map<String, Object> dealTabletest(Map<String, Object> paramMap, ExportDataPackage exportDataPackage) {
+    private ReportsWordTemplate showClf(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
+        Map<String, Object> data_zhiBiaoZzxsjgbdqk = new HashMap<String, Object>();
+
+        // 数据库查询城市指标数据data1 <db,data>
+        QueryWrapper<ZhiBiaoZzxsjgbdqk> wrapper = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoZzxsjgbdqk> lambda = wrapper.lambda();
+        lambda.in(ZhiBiaoZzxsjgbdqk::getCity, hz);
+        lambda.eq(ZhiBiaoZzxsjgbdqk::getLb, "3");
+        LocalDate thisMonthFirstday = LocalDate.of(last.getYear(), last.getMonth(), 1);
+        Date thisMonthFirstDate = DateUtil.localDate2Date(thisMonthFirstday);
+        lambda.eq(ZhiBiaoZzxsjgbdqk::getTitle, thisMonthFirstDate);
+        Map<String, Object> datas_Zzxsjgbdqkdata_hz = zhiBiaoZzxsjgbdqkService.getMap(wrapper);
+        if (!CollectionUtils.isEmpty(datas_Zzxsjgbdqkdata_hz)) {
+            datas_Zzxsjgbdqkdata_hz.forEach((k, v) -> {
+                Optional.ofNullable(v).map(u -> data_zhiBiaoZzxsjgbdqk.put("CLF_ODS_PY_ZZXSJGBDQK_MM_" + k, datas_Zzxsjgbdqkdata_hz.get(k)));
+            });
+        }
+        // 数据库查询word模板指标参数zhibiaoMap <db,word>
+        ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(templateId);
+        String zhibiaos = reportsWordTemplate.getZhibiaos();
+        HashMap<String, String> zhibiaoMap = Optional.ofNullable(zhibiaos).map(u -> JSONObject.parseObject(u, HashMap.class)).get();
+
+        zhibiaoMap.forEach((k, v) -> {
+            Optional.ofNullable(v).map(u -> data_zhiBiaoZzxsjgbdqk.put(v, data_zhiBiaoZzxsjgbdqk.get(k)));
+        });
+        dataFinal.putAll(data_zhiBiaoZzxsjgbdqk);
+
+        //查询22个城市ZhiBiaoZzxsjgbdqk
+        QueryWrapper<ZhiBiaoZzxsjgbdqk> wrapper2 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoZzxsjgbdqk> lambda2 = wrapper2.lambda();
+        List<String> cities = Arrays.asList(city.split(","));
+        lambda2.in(ZhiBiaoZzxsjgbdqk::getCity, cities);
+        lambda2.eq(ZhiBiaoZzxsjgbdqk::getLb, "3");
+        Date firstDayOfYearDate = DateUtil.localDate2Date(last.with(TemporalAdjusters.firstDayOfYear()));
+        Date thisMonthFirstdayDate = DateUtil.localDate2Date(thisMonthFirstday);
+        lambda2.ge(ZhiBiaoZzxsjgbdqk::getTitle, firstDayOfYearDate);
+        lambda2.le(ZhiBiaoZzxsjgbdqk::getTitle, thisMonthFirstdayDate);
+        List<ZhiBiaoZzxsjgbdqk> sourceList = zhiBiaoZzxsjgbdqkService.list(wrapper2);
+        //todo 指标转换
+        //上月22个city集合
+        List<ZhiBiaoZzxsjgbdqk> list22 = sourceList.stream().filter(x -> DateUtil.date2LocalDate(x.getTitle())
+                .equals(thisMonthFirstday)).collect(Collectors.toList());
+        // <city,各月list>
+        Map<String, List<ZhiBiaoZzxsjgbdqk>> maplist = sourceList.stream().collect(Collectors.groupingBy(ZhiBiaoZzxsjgbdqk::getCity));
+
+        //计算同比平均
+        Map<String, String> dataTbpjMap = new HashMap<String, String>();
+        //计算环比累计
+        Map<String, String> dataHbljMap = new HashMap<String, String>();
+        maplist.forEach((k, v) -> {
+            Double tbpj = v.stream().mapToDouble(ZhiBiaoZzxsjgbdqk::getYoy).average().getAsDouble();//同比平均
+            String formatTbpj = String.format("%.1f", tbpj);
+            Optional.ofNullable(v).map(u -> dataTbpjMap.put(k, formatTbpj));
+
+            Double hblj = v.stream().map(ZhiBiaoZzxsjgbdqk::getMom).reduce((p1, p2) -> p1 * p2 / 100).orElse(0D); //环比累计
+            String formatHblj = String.format("%.1f", hblj);
+            Optional.ofNullable(v).map(u -> dataHbljMap.put(k, formatHblj));
+        });
+        List<ZhiBiaoZzxsjgbdqkVo> finalList = list22.stream().map(zb -> {
+            ZhiBiaoZzxsjgbdqkVo zbvo = new ZhiBiaoZzxsjgbdqkVo();
+            zbvo.setCity(zb.getCity());
+            zbvo.setMom(zb.getMom());
+            zbvo.setYoy(zb.getYoy());
+            zbvo.setYoyPj(Double.valueOf(dataTbpjMap.get(zb.getCity())));
+            zbvo.setMomLj(Double.valueOf(dataHbljMap.get(zb.getCity())));
+            return zbvo;
+        }).collect(Collectors.toList());
+        dataFinal.put("clf_tbpj", dataTbpjMap.get(hz));
+        dataFinal.put("clf_hblj", dataHbljMap.get(hz));
+
+        //计算排名
+        List<ZhiBiaoZzxsjgbdqkVo> sortedMomObjList = finalList.stream()
+                .sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getMom).reversed().thenComparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoy))
+                .collect(Collectors.toList());
+        List<String> sortedMomList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getMom).reversed().thenComparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoy)).map(x -> x.getCity()).collect(Collectors.toList());
+        List<String> sortedYoyList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoy).reversed()).map(x -> x.getCity()).collect(Collectors.toList());
+        List<String> sortedMomLjList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getMomLj).reversed()).map(x -> x.getCity()).collect(Collectors.toList());
+        List<String> sortedYoyPjList = finalList.stream().sorted(Comparator.comparingDouble(ZhiBiaoZzxsjgbdqkVo::getYoyPj).reversed()).map(x -> x.getCity()).collect(Collectors.toList());
+
+
+        Map rankMap = new HashMap();
+        int momRank = sortedMomList.indexOf(hz) + 1;
+        int yoyRank = sortedYoyList.indexOf(hz) + 1;
+        int momLjRank = sortedMomLjList.indexOf(hz) + 1;
+        int yoyPjank = sortedYoyPjList.indexOf(hz) + 1;
+        rankMap.put("clf_momRank", momRank);
+        rankMap.put("clf_yoyRank", yoyRank);
+        rankMap.put("clf_momLjRank", momLjRank);
+        rankMap.put("clf_yoyPjank", yoyPjank);
+        dataFinal.putAll(rankMap);
+
+        ExportDataPackage exportDataPackage = new ExportDataPackage();
+        exportDataPackage.setZhiBiaoZzxsjgbdqkList(sortedMomObjList);
+        exportDataPackage.setRankMap(rankMap);
+        //渲染表格
+        this.dealTableClf(dataFinal, exportDataPackage);
+
+        //渲染图表
+        this.dealChart(dataFinal);
+
+
+        //渲染 数组
+        List<ZhiBiaoZzxsjgbdqk> zhiBiaoZzxsjgbdqks_hz = maplist.get(hz);
+        List<Double> zhiBiaoZzxsjgbdqks_hz_sortedList = zhiBiaoZzxsjgbdqks_hz.stream().sorted(Comparator.comparing(ZhiBiaoZzxsjgbdqk::getTitle)).map(x ->
+                x.getMom()
+        ).collect(Collectors.toList());
+
+        List<Map<String, String>> hbList = new ArrayList<Map<String, String>>();
+        for (int i = 0; i < zhiBiaoZzxsjgbdqks_hz_sortedList.size(); i++) {
+            Double aDouble = zhiBiaoZzxsjgbdqks_hz_sortedList.get(i);
+            Map<String, String> map = new HashMap<String, String>();
+            if (i == 0) {
+                map.put("clfdate", "" + aDouble);
+            } else {
+                map.put("clfdate", "," + aDouble);
+            }
+            hbList.add(map);
+        }
+
+        dataFinal.put("clfHbList", hbList);
+        return reportsWordTemplate;
+    }
+
+    private Map<String, Object> dealTableSpf(Map<String, Object> paramMap, ExportDataPackage exportDataPackage) {
 
 
         RowRenderData row01 = Rows.of("城市", "环比", "环比累计", "同比", "平均同比")
@@ -224,11 +353,11 @@ public class ExportWordController {
         }
         Map rankMap = exportDataPackage.getRankMap();
         listCellRenderDatas01.add(Rows.of("杭州位次"
-                , rankMap.get("momRank") + "", rankMap.get("momLjRank") + ""
-                , rankMap.get("yoyRank") + "", rankMap.get("yoyPjank") + "")
+                , rankMap.get("spf_momRank") + "", rankMap.get("spf_momLjRank") + ""
+                , rankMap.get("spf_yoyRank") + "", rankMap.get("spf_yoyPjank") + "")
                 .center().horizontalCenter().textFontSize(8).create());
         RowRenderData[] rowRenderData01 = listCellRenderDatas01.stream().toArray(RowRenderData[]::new);
-        paramMap.put("tableTemplate", Tables.of(rowRenderData01).create());
+        paramMap.put("spf_tableTemplate", Tables.of(rowRenderData01).create());
 
         //////////////合并///////////////////////
         RowRenderData row0 = Rows.of("城区", "登记项目及登记户数", null, null, "项目流摇情况", null, null, "平均中签率")
@@ -258,6 +387,31 @@ public class ExportWordController {
         return paramMap;
     }
 
+    private Map<String, Object> dealTableClf(Map<String, Object> paramMap, ExportDataPackage exportDataPackage) {
+
+
+        RowRenderData row01 = Rows.of("城市", "环比", "环比累计", "同比", "平均同比")
+                .center().horizontalCenter().textFontSize(8).textColor("FFFFFF").bgColor("4472C4").create();
+
+        List<RowRenderData> listCellRenderDatas01 = new ArrayList<RowRenderData>();
+        listCellRenderDatas01.add(row01);
+        List<ZhiBiaoZzxsjgbdqkVo> zhiBiaoZzxsjgbdqkList = exportDataPackage.getZhiBiaoZzxsjgbdqkList();
+        for (ZhiBiaoZzxsjgbdqkVo zhiBiaoZzxsjgbdqk : zhiBiaoZzxsjgbdqkList) {
+            listCellRenderDatas01.add(Rows.of(zhiBiaoZzxsjgbdqk.getCity()
+                    , zhiBiaoZzxsjgbdqk.getMom() + "", zhiBiaoZzxsjgbdqk.getMomLj() + ""
+                    , zhiBiaoZzxsjgbdqk.getYoy() + "", zhiBiaoZzxsjgbdqk.getYoyPj() + "")
+                    .center().horizontalCenter().textFontSize(8).create());
+        }
+        Map rankMap = exportDataPackage.getRankMap();
+        listCellRenderDatas01.add(Rows.of("杭州位次"
+                , rankMap.get("clf_momRank") + "", rankMap.get("clf_momLjRank") + ""
+                , rankMap.get("clf_yoyRank") + "", rankMap.get("clf_yoyPjank") + "")
+                .center().horizontalCenter().textFontSize(8).create());
+        RowRenderData[] rowRenderData01 = listCellRenderDatas01.stream().toArray(RowRenderData[]::new);
+        paramMap.put("clf_tableTemplate", Tables.of(rowRenderData01).create());
+
+        return paramMap;
+    }
 
     private Map<String, Object> dealChart(Map<String, Object> paramMap) {
 
