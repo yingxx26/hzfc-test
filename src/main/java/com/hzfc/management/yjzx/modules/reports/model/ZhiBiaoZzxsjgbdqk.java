@@ -20,7 +20,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("HZ_TEST.ODS_PY_ZZXSJGBDQK_MM")
-@ApiModel(value = "ODS_PY_ZZXSJGBDQK_MM指标", description = "指标")
+@ApiModel(value = "ODS_PY_ZZXSJGBDQK_MM指标", description = "价格指数指标")
 public class ZhiBiaoZzxsjgbdqk implements Serializable {
 
     private static final long serialVersionUID = 1L;

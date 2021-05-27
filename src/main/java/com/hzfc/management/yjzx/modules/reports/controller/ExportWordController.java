@@ -8,8 +8,10 @@ import com.deepoove.poi.data.*;
 import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.dto.*;
 import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
+import com.hzfc.management.yjzx.modules.reports.model.ZhiBiaoYhbm;
 import com.hzfc.management.yjzx.modules.reports.model.ZhiBiaoZzxsjgbdqk;
 import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
+import com.hzfc.management.yjzx.modules.reports.service.ZhiBiaoYhbmService;
 import com.hzfc.management.yjzx.modules.reports.service.ZhiBiaoZzxsjgbdqkService;
 import com.hzfc.management.yjzx.utils.dateUtils.DateUtil;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
@@ -26,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 导出Word
@@ -55,6 +58,9 @@ public class ExportWordController {
 
     @Autowired
     private ZhiBiaoZzxsjgbdqkService zhiBiaoZzxsjgbdqkService;
+
+    @Autowired
+    private ZhiBiaoYhbmService zZhiBiaoYhbmService;
 
     @RequestMapping(value = "/exportUserWord/{templateId}", method = RequestMethod.POST)
     @ResponseBody
@@ -91,7 +97,79 @@ public class ExportWordController {
         }
     }
 
+    /**
+     * 查看文件
+     *
+     * @param filename
+     * @return
+     */
+    @ApiOperation("查看生成数据的文件")
+    @RequestMapping(value = "/viewbyname/{filename}", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<String> viewbypath(@PathVariable("filename") String filename) {
+
+        String fullpath = temporaryPath + filename;
+        String base64 = null;
+        try {
+            base64 = Base64FileUtil.fileToBase64(fullpath);
+        } catch (Exception e) {
+            return CommonResult.failed("文件异常");
+        }
+        return CommonResult.success(base64);
+    }
+
+
+    @ApiOperation("删除生成数据的文件")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult delete(@PathVariable Long id) {
+
+        boolean success = reportsWordTemplateService.delete(id);
+        if (success) {
+            return CommonResult.success(null);
+        }
+        return CommonResult.failed();
+    }
+
+
     private ReportsWordTemplate showSpf(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
+        ReportsWordTemplate reportsWordTemplate = jiageZhishu_spf(templateId, dataFinal, last);
+        yhbm(templateId, dataFinal, last);
+        return reportsWordTemplate;
+    }
+
+    private ReportsWordTemplate showClf(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
+        ReportsWordTemplate reportsWordTemplate = jiageZhishu_clf(templateId, dataFinal, last);
+        return reportsWordTemplate;
+    }
+
+    private void yhbm(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
+        Map<String, Object> data_yhbm = new HashMap<String, Object>();
+        QueryWrapper<ZhiBiaoYhbm> wrapper2 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoYhbm> lambda2 = wrapper2.lambda();
+        Date firstDayOfYearDate = DateUtil.localDate2Date(last.with(TemporalAdjusters.firstDayOfYear()));
+        LocalDate thisMonthFirstday = LocalDate.of(last.getYear(), last.getMonth(), 1);
+        Date thisMonthFirstdayDate = DateUtil.localDate2Date(thisMonthFirstday);
+        lambda2.ge(ZhiBiaoYhbm::getBmkssj, firstDayOfYearDate);
+        lambda2.le(ZhiBiaoYhbm::getBmkssj, thisMonthFirstdayDate);
+        List<ZhiBiaoYhbm> sourceList = zZhiBiaoYhbmService.list(wrapper2);
+        List<ZhiBiaoYhbm> mm = sourceList.stream().map(x -> {
+            x.setMonth(DateUtil.format(x.getBmkssj(), "MM"));
+            return x;
+        }).collect(Collectors.toList());
+        Map<String, List<ZhiBiaoYhbm>> collect = mm.stream().collect(Collectors.groupingBy(ZhiBiaoYhbm::getMonth));
+
+        Map<String, LongSummaryStatistics> collect1 = mm.stream().collect(Collectors.groupingBy(ZhiBiaoYhbm::getMonth, Collectors.summarizingLong(ZhiBiaoYhbm::getFys)));
+
+        Map<String, LongSummaryStatistics> collect2 = mm.stream().collect(Collectors.groupingBy(ZhiBiaoYhbm::getLpcq, Collectors.summarizingLong(ZhiBiaoYhbm::getFys)));
+
+
+        dataFinal.putAll(data_yhbm);
+        dataFinal.put("xx", "xx");
+    }
+
+
+    private ReportsWordTemplate jiageZhishu_spf(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
         Map<String, Object> data_zhiBiaoZzxsjgbdqk = new HashMap<String, Object>();
 
         // 数据库查询城市指标数据data1 <db,data>
@@ -213,7 +291,8 @@ public class ExportWordController {
         return reportsWordTemplate;
     }
 
-    private ReportsWordTemplate showClf(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
+
+    private ReportsWordTemplate jiageZhishu_clf(@PathVariable("templateId") Long templateId, Map<String, Object> dataFinal, LocalDate last) {
         Map<String, Object> data_zhiBiaoZzxsjgbdqk = new HashMap<String, Object>();
 
         // 数据库查询城市指标数据data1 <db,data>
@@ -357,7 +436,7 @@ public class ExportWordController {
                 , rankMap.get("spf_yoyRank") + "", rankMap.get("spf_yoyPjank") + "")
                 .center().horizontalCenter().textFontSize(8).create());
         RowRenderData[] rowRenderData01 = listCellRenderDatas01.stream().toArray(RowRenderData[]::new);
-        paramMap.put("spf_tableTemplate", Tables.of(rowRenderData01).create());
+        paramMap.put("spf_jgzs_tableTemplate", Tables.of(rowRenderData01).create());
 
         //////////////合并///////////////////////
         RowRenderData row0 = Rows.of("城区", "登记项目及登记户数", null, null, "项目流摇情况", null, null, "平均中签率")
@@ -382,7 +461,7 @@ public class ExportWordController {
         listCellRenderDatas.add(row1);
         listCellRenderDatas.add(row2);
         RowRenderData[] rowRenderData = listCellRenderDatas.stream().toArray(RowRenderData[]::new);
-        paramMap.put("tableMergeTemplate", Tables.of(rowRenderData).mergeRule(rule).create());
+        paramMap.put("spf_yhbm_Template", Tables.of(rowRenderData).mergeRule(rule).create());
 
         return paramMap;
     }
@@ -494,39 +573,5 @@ public class ExportWordController {
         return paramMap;
     }
 
-
-    /**
-     * 查看文件
-     *
-     * @param filename
-     * @return
-     */
-    @ApiOperation("查看生成数据的文件")
-    @RequestMapping(value = "/viewbyname/{filename}", method = RequestMethod.GET)
-    @ResponseBody
-    public CommonResult<String> viewbypath(@PathVariable("filename") String filename) {
-
-        String fullpath = temporaryPath + filename;
-        String base64 = null;
-        try {
-            base64 = Base64FileUtil.fileToBase64(fullpath);
-        } catch (Exception e) {
-            return CommonResult.failed("文件异常");
-        }
-        return CommonResult.success(base64);
-    }
-
-
-    @ApiOperation("删除生成数据的文件")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult delete(@PathVariable Long id) {
-
-        boolean success = reportsWordTemplateService.delete(id);
-        if (success) {
-            return CommonResult.success(null);
-        }
-        return CommonResult.failed();
-    }
 
 }

@@ -33,7 +33,7 @@ public class DateUtil {
     }
 
 
-    //日期和字符串之间的转换
+    //日期和字符串之间的转换 DateUtil.format(date, "yyyy-MM-dd")
     public static String format(Date date, String type) {
         LocalDate localDate = toLocalDate(date);
         //建一个DaeTimeFormatter类的对象
