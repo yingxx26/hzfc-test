@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,4 +26,14 @@ public class ExportDataPackage {
     List<ZhiBiaoZzxsjgbdqkVo> zhiBiaoZzxsjgbdqkList;
 
     Map rankMap;
+
+    List<Yhcqtj> yhcqtjList;
+
+    List<String> yhbm_everyMonth_month_List;
+
+    List<Integer> yhbm_everyMonth_yhsize_List;
+
+    List<Integer> yhbm_everyMonth_lysize_List;
+
+    List<Double> yhbm_everyMonth_lylv_List;
 }
