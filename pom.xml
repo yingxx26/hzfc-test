@@ -143,6 +143,11 @@
             <version>${velocity.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.corundumstudio.socketio</groupId>
+            <artifactId>netty-socketio</artifactId>
+            <version>1.7.7</version>
+        </dependency>
 
         <!-- word导出  方式一：poi-tl-->
         <!-- poi-tl是基于Apache POI的Word模板引擎。poi-tl依赖的是poi3.16版本 -->

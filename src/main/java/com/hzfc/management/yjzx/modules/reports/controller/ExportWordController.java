@@ -7,12 +7,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.deepoove.poi.data.*;
 import com.hzfc.management.yjzx.common.api.CommonResult;
 import com.hzfc.management.yjzx.modules.reports.dto.*;
-import com.hzfc.management.yjzx.modules.reports.model.ReportsWordTemplate;
-import com.hzfc.management.yjzx.modules.reports.model.ZhiBiaoYhbm;
-import com.hzfc.management.yjzx.modules.reports.model.ZhiBiaoZzxsjgbdqk;
-import com.hzfc.management.yjzx.modules.reports.service.ReportsWordTemplateService;
-import com.hzfc.management.yjzx.modules.reports.service.ZhiBiaoYhbmService;
-import com.hzfc.management.yjzx.modules.reports.service.ZhiBiaoZzxsjgbdqkService;
+import com.hzfc.management.yjzx.modules.reports.model.*;
+import com.hzfc.management.yjzx.modules.reports.service.*;
 import com.hzfc.management.yjzx.utils.dateUtils.DateUtil;
 import com.hzfc.management.yjzx.utils.fileutils.Base64FileUtil;
 import com.hzfc.management.yjzx.utils.fileutils.DeleteFileUtil;
@@ -76,6 +72,16 @@ public class ExportWordController {
 
     @Autowired
     private ZhiBiaoYhbmService zZhiBiaoYhbmService;
+
+    @Autowired
+    private ZhiBiaoSpfjyCqService zhiBiaoSpfjyCqService;
+
+    @Autowired
+    private ZhiBiaoSpfjyZhCqService zhiBiaoSpfjyZhCqService;
+
+    @Autowired
+    private ZhiBiaoSpfPzksService zhiBiaoSpfPzksService;
+
 
     @RequestMapping(value = "/exportUserWord/{templateId}", method = RequestMethod.POST)
     @ResponseBody
@@ -151,6 +157,8 @@ public class ExportWordController {
     private ReportsWordTemplate showSpf(Long templateId, Map<String, Object> dataFinal, LocalDate last, ExportDataPackage exportDataPackage) {
         ReportsWordTemplate reportsWordTemplate = this.jiageZhishu_spf(templateId, dataFinal, last, exportDataPackage);
         this.yhbm(templateId, dataFinal, last, exportDataPackage);
+        this.spfcj(templateId, dataFinal, last, exportDataPackage);
+
         //渲染表格
         this.dealTableSpf_jiagezhishu(dataFinal, exportDataPackage);
         this.dealTableSpf_yhbm(dataFinal, exportDataPackage);
@@ -168,15 +176,165 @@ public class ExportWordController {
         return reportsWordTemplate;
     }
 
+    private void spfcj(Long templateId, Map<String, Object> dataFinal, LocalDate last, ExportDataPackage exportDataPackage) {
+
+        Date firstDayOfYearDate = DateUtil.localDate2Date(last.with(TemporalAdjusters.firstDayOfYear()));
+        LocalDate lastMonthlastDay = last.with(TemporalAdjusters.lastDayOfMonth());
+        Date thisMonthLastdayDate = DateUtil.localDate2Date(lastMonthlastDay);
+        String firstDayOfYearDate_yyyyMM = DateUtil.format(firstDayOfYearDate, "yyyyMM");
+        String thisMonthLastdayDate_yyyyMM = DateUtil.format(thisMonthLastdayDate, "yyyyMM");
+
+        QueryWrapper<ZhiBiaoSpfjyZhCq> wrapper1 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoSpfjyZhCq> lambda1 = wrapper1.lambda();
+        lambda1.ge(ZhiBiaoSpfjyZhCq::getTjsj, firstDayOfYearDate_yyyyMM);
+        lambda1.le(ZhiBiaoSpfjyZhCq::getTjsj, thisMonthLastdayDate_yyyyMM);
+        List<ZhiBiaoSpfjyZhCq> zhiBiaoSpfjyZhCqList = zhiBiaoSpfjyZhCqService.list(wrapper1);
+
+        QueryWrapper<ZhiBiaoSpfjyCq> wrapper2 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoSpfjyCq> lambda2 = wrapper2.lambda();
+        lambda2.ge(ZhiBiaoSpfjyCq::getTjsj, firstDayOfYearDate_yyyyMM);
+        lambda2.le(ZhiBiaoSpfjyCq::getTjsj, thisMonthLastdayDate_yyyyMM);
+        List<ZhiBiaoSpfjyCq> zhiBiaoSpfjyCqList = zhiBiaoSpfjyCqService.list(wrapper2);
+
+        QueryWrapper<ZhiBiaoSpfPzks> wrapper3 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoSpfPzks> lambda3 = wrapper3.lambda();
+        lambda3.ge(ZhiBiaoSpfPzks::getTjsj, firstDayOfYearDate_yyyyMM);
+        lambda3.le(ZhiBiaoSpfPzks::getTjsj, thisMonthLastdayDate_yyyyMM);
+        List<ZhiBiaoSpfPzks> zhiBiaoSpfPzksCqList = zhiBiaoSpfPzksService.list(wrapper3);
+
+
+        Optional<ZhiBiaoSpfjyZhCq> first = zhiBiaoSpfjyZhCqList.stream().filter(x -> thisMonthLastdayDate_yyyyMM.equals(x.getTjsj()) && "本月套数".equals(x.getZbname())).findFirst();
+        ZhiBiaoSpfjyZhCq zhiBiaoSpfjyZhCq_thisMonth = first.get();
+        System.out.println();
+       /* QueryWrapper<ZhiBiaoYhbm> wrapper2 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoYhbm> lambda2 = wrapper2.lambda();
+        LocalDate quNian = last.plusYears(-1);
+        Date firstDayOfYearDate_quNian = DateUtil.localDate2Date(quNian.with(TemporalAdjusters.firstDayOfYear()));
+        LocalDate thisMonthFirstday_quNian = LocalDate.of(quNian.getYear(), last.getMonth(), 1);
+        Date thisMonthFirstdayDate_quNian = DateUtil.localDate2Date(thisMonthFirstday_quNian);
+        lambda2.ge(ZhiBiaoYhbm::getYhjssj, firstDayOfYearDate_quNian);
+        lambda2.le(ZhiBiaoYhbm::getYhjssj, thisMonthFirstdayDate_quNian);
+        List<ZhiBiaoYhbm> sourceListLast2 = zZhiBiaoYhbmService.list(wrapper2);
+        List<ZhiBiaoYhbm> formatSourceListThis2 = Optional.ofNullable(sourceListLast2).get().stream().map(x -> {
+            x.setMonth(DateUtil.format(x.getYhjssj(), "M"));
+            return x;
+        }).collect(Collectors.toList());
+
+        //今年按月份 原数据
+        Map<String, List<ZhiBiaoYhbm>> maplist_month_thisnian = Optional.ofNullable(formatSourceListThis).get().stream().collect(Collectors.groupingBy(ZhiBiaoYhbm::getMonth));
+        //去年按月份 原数据
+        Map<String, List<ZhiBiaoYhbm>> maplist_month_qunian = Optional.ofNullable(formatSourceListThis2).get().stream().collect(Collectors.groupingBy(ZhiBiaoYhbm::getMonth));
+
+        /////////////////////////////////////按月统计////////////////////////////////////////////
+        //计算今年每月总登记数
+        Map<String, String> yhbm_everyMonth_djsize_Map = new HashMap<String, String>();
+        //计算今年每月摇号数
+        Map<String, String> yhbm_everyMonth_yhsize_Map = new HashMap<String, String>();
+        //计算今年每月流摇数
+        Map<String, String> yhbm_everyMonth_lysize_Map = new HashMap<String, String>();
+        //计算今年每月流摇lv
+        Map<String, String> yhbm_everyMonth_lylv_Map = new HashMap<String, String>();
+        //计算今年每月中签率
+        Map<String, String> yhbm_everyMonth_pjzql_Map = new HashMap<String, String>();
+
+        String month = last.getMonthValue() + "";
+        String lastmonth = last.getMonthValue() - 1 + "";
+
+        List<String> yhbm_everyMonth_month_List = new ArrayList<String>();
+        List<Integer> yhbm_everyMonth_yhsize_List = new ArrayList<Integer>();
+        List<Integer> yhbm_everyMonth_lysize_List = new ArrayList<Integer>();
+        List<Double> yhbm_everyMonth_lylv_List = new ArrayList<Double>();
+        maplist_month_thisnian.forEach((k, v) -> {
+            Integer yhbm_thisMonth_djsize = v.size();
+            yhbm_everyMonth_djsize_Map.put(k, String.valueOf(yhbm_thisMonth_djsize));
+            List<ZhiBiaoYhbm> yhbm_thisMonth = v.stream().filter(x -> x.getBmrs() != null && x.getFys() != null).filter(x -> (x.getBmrs() - x.getFys()) > 0).collect(Collectors.toList());
+            Integer yhbm_thisMonth_yhsize = yhbm_thisMonth.size();
+            yhbm_everyMonth_yhsize_Map.put(k, String.valueOf(yhbm_thisMonth_yhsize));
+            Integer yhbm_thisMonth_lysize = yhbm_thisMonth_djsize - yhbm_thisMonth_yhsize;
+            yhbm_everyMonth_lysize_Map.put(k, String.valueOf(yhbm_thisMonth_lysize));
+            Double yhbm_thisMonth_lylv = new BigDecimal((float) yhbm_thisMonth_lysize / yhbm_thisMonth_djsize).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            yhbm_everyMonth_lylv_Map.put(k, yhbm_thisMonth_lylv + "");
+            Double yhbm_thisMonth_pjzql = v.stream().filter(x -> x.getZql() != null).mapToDouble(ZhiBiaoYhbm::getZql).average().getAsDouble();
+            yhbm_everyMonth_pjzql_Map.put(k, yhbm_thisMonth_pjzql + "");
+
+            ///图表
+            yhbm_everyMonth_month_List.add(k + "月");
+            yhbm_everyMonth_yhsize_List.add(yhbm_thisMonth_yhsize);
+            yhbm_everyMonth_lysize_List.add(yhbm_thisMonth_lysize);
+            yhbm_everyMonth_lylv_List.add(yhbm_thisMonth_lylv);
+        });
+        exportDataPackage.setYhbm_everyMonth_month_List(yhbm_everyMonth_month_List);
+        exportDataPackage.setYhbm_everyMonth_yhsize_List(yhbm_everyMonth_yhsize_List);
+        exportDataPackage.setYhbm_everyMonth_lysize_List(yhbm_everyMonth_lysize_List);
+        exportDataPackage.setYhbm_everyMonth_lylv_List(yhbm_everyMonth_lylv_List);
+        //这月登记数
+        Integer yhbm_thisMonth_djsize = Integer.valueOf(yhbm_everyMonth_djsize_Map.get(month));
+        dataFinal.put("yhbm_thisMonth_djsize", yhbm_thisMonth_djsize);
+        //上月登记数
+        Integer yhbm_lastMonth_djsize = Integer.valueOf(yhbm_everyMonth_djsize_Map.get(lastmonth));
+        Integer yhbm_thisMonth_hb = yhbm_thisMonth_djsize - yhbm_lastMonth_djsize;
+        //这月登记环比
+        if (yhbm_thisMonth_hb > 0) {
+            dataFinal.put("yhbm_thisMonth_hb_true", true);
+        } else {
+            dataFinal.put("yhbm_thisMonth_hb_false", true);
+        }
+        dataFinal.put("yhbm_thisMonth_hb", Math.abs(yhbm_thisMonth_hb));
+        //这月流摇绿
+        dataFinal.put("yhbm_thisMonth_lylv", new BigDecimal(yhbm_everyMonth_lylv_Map.get(month)).multiply(new BigDecimal("100")) + "%");
+        //这月平均中签率
+        dataFinal.put("yhbm_thisMonth_pjzql", new BigDecimal(yhbm_everyMonth_pjzql_Map.get(month)).multiply(new BigDecimal("100")) + "%");
+        //上月平均中签率
+        Double yhbm_lastMonth_pjzql = Double.valueOf(yhbm_everyMonth_pjzql_Map.get(lastmonth));
+        //中签率环比
+        Double yhbm_thisMonth_pjzql = Double.valueOf(yhbm_everyMonth_pjzql_Map.get(month));
+        BigDecimal yhbm_thisMonth_zqlhb = new BigDecimal((float) ((yhbm_thisMonth_pjzql - yhbm_lastMonth_pjzql) / yhbm_lastMonth_pjzql)).setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        if (yhbm_thisMonth_zqlhb.compareTo(BigDecimal.ZERO) > 0) {
+            dataFinal.put("yhbm_thisMonth_zqlhb_true", true);
+        } else {
+            dataFinal.put("yhbm_thisMonth_zqlhb_false", true);
+        }
+        dataFinal.put("yhbm_thisMonth_zqlhb", yhbm_thisMonth_zqlhb.abs().multiply(new BigDecimal("100")) + "%");
+        //续销
+        List<ZhiBiaoYhbm> list_month_this = maplist_month_thisnian.get(month);
+        List<ZhiBiaoYhbm> before_thismonth_newList = new ArrayList<ZhiBiaoYhbm>(Arrays.asList(new ZhiBiaoYhbm[formatSourceListThis.size()]));
+        Collections.copy(before_thismonth_newList, formatSourceListThis);
+        before_thismonth_newList.removeAll(list_month_this);
+
+        StringBuffer yhbm_thisMonth_zqlhb_rise = new StringBuffer();
+        StringBuffer yhbm_thisMonth_zqlhb_reduce = new StringBuffer();
+        StringBuffer yhbm_thisMonth_zqlhb_equal = new StringBuffer();
+        for (ZhiBiaoYhbm thismonth : list_month_this) {
+            for (ZhiBiaoYhbm beforemonth : before_thismonth_newList) {
+                if (beforemonth.getLpmc().indexOf(thismonth.getLpmc()) > 0) {
+                    if (thismonth.getZql() > beforemonth.getZql()) {
+                        yhbm_thisMonth_zqlhb_rise.append(thismonth.getLpmc());
+                    } else if (thismonth.getZql() < beforemonth.getZql()) {
+                        yhbm_thisMonth_zqlhb_reduce.append(thismonth.getLpmc());
+                    } else {
+                        yhbm_thisMonth_zqlhb_equal.append(thismonth.getLpmc());
+                    }
+                }
+            }
+        }
+        dataFinal.put("yhbm_thisMonth_zqlhb_rise", yhbm_thisMonth_zqlhb_rise);
+        dataFinal.put("yhbm_thisMonth_zqlhb_reduce", yhbm_thisMonth_zqlhb_reduce);
+        dataFinal.put("yhbm_thisMonth_zqlhb_equal", yhbm_thisMonth_zqlhb_equal);*/
+
+    }
+
+
     private void yhbm(Long templateId, Map<String, Object> dataFinal, LocalDate last, ExportDataPackage exportDataPackage) {
 
         QueryWrapper<ZhiBiaoYhbm> wrapper1 = new QueryWrapper<>();
         LambdaQueryWrapper<ZhiBiaoYhbm> lambda1 = wrapper1.lambda();
         Date firstDayOfYearDate = DateUtil.localDate2Date(last.with(TemporalAdjusters.firstDayOfYear()));
-        LocalDate thisMonthFirstday = LocalDate.of(last.getYear(), last.getMonth(), 1);
-        Date thisMonthFirstdayDate = DateUtil.localDate2Date(thisMonthFirstday);
+        //LocalDate thisMonthFirstday = LocalDate.of(last.getYear(), last.getMonth(), 1);
+        LocalDate lastMonthlastDay = last.with(TemporalAdjusters.lastDayOfMonth());
+        Date thisMonthLastdayDate = DateUtil.localDate2Date(lastMonthlastDay);
         lambda1.ge(ZhiBiaoYhbm::getYhjssj, firstDayOfYearDate);
-        lambda1.le(ZhiBiaoYhbm::getYhjssj, thisMonthFirstdayDate);
+        lambda1.le(ZhiBiaoYhbm::getYhjssj, thisMonthLastdayDate);
         List<ZhiBiaoYhbm> sourceListThis = zZhiBiaoYhbmService.list(wrapper1);
         List<ZhiBiaoYhbm> formatSourceListThis = Optional.ofNullable(sourceListThis).get().stream().map(x -> {
             x.setMonth(DateUtil.format(x.getYhjssj(), "M"));
@@ -350,11 +508,11 @@ public class ExportWordController {
         dataFinal.put("yhbm_fy_lylv", yhbm_everyCq_lylv_Map.get(fy));
         dataFinal.put("yhbm_la_lylv", yhbm_everyCq_lylv_Map.get(la));
         //这城区平均中签率
-        dataFinal.put("yhbm_zcq_pjzql", yhbm_everyCq_lylv_Map.get(zcq));
-        dataFinal.put("yhbm_xs_pjzql", yhbm_everyCq_lylv_Map.get(xs));
-        dataFinal.put("yhbm_yh_pjzql", yhbm_everyCq_lylv_Map.get(yh));
-        dataFinal.put("yhbm_fy_pjzql", yhbm_everyCq_lylv_Map.get(fy));
-        dataFinal.put("yhbm_la_pjzql", yhbm_everyCq_lylv_Map.get(la));
+        dataFinal.put("yhbm_zcq_pjzql", yhbm_everyCq_pjzql_Map.get(zcq));
+        dataFinal.put("yhbm_xs_pjzql", yhbm_everyCq_pjzql_Map.get(xs));
+        dataFinal.put("yhbm_yh_pjzql", yhbm_everyCq_pjzql_Map.get(yh));
+        dataFinal.put("yhbm_fy_pjzql", yhbm_everyCq_pjzql_Map.get(fy));
+        dataFinal.put("yhbm_la_pjzql", yhbm_everyCq_pjzql_Map.get(la));
 
         //////////////////////////////总指标/////////////////////////////////////////////////
         //当年总登记数
