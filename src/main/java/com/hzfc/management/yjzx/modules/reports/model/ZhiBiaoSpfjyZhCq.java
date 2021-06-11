@@ -37,34 +37,34 @@ public class ZhiBiaoSpfjyZhCq implements Serializable {
 
     @ApiModelProperty(value = "累计指标")
     @TableField("SPFJY_ZBZ_TY_CQ")
-    private BigDecimal spfjyZbzTyCq;
+    private Double spfjyZbzTyCq;
 
     @ApiModelProperty(value = "同比增长")
     @TableField("SPFJY_ZBZ_TY_CQ_TB")
-    private BigDecimal spfjyZbzTyCqTb;
+    private Double spfjyZbzTyCqTb;
 
     @ApiModelProperty(value = "住宅累计指标")
     @TableField("SPFJY_ZBZ_ZZ_TY_CQ")
-    private BigDecimal spfjyZbzZzTyCq;
+    private Double spfjyZbzZzTyCq;
 
     @ApiModelProperty(value = "住宅同比增长")
     @TableField("SPFJY_ZBZ_ZZ_TY_CQ_TB")
-    private BigDecimal spfjyZbzZzTyCqTb;
+    private Double spfjyZbzZzTyCqTb;
 
     @ApiModelProperty(value = "市区累计指标")
     @TableField("SPFJY_ZBZ_TY_SQ")
-    private BigDecimal spfjyZbzTySq;
+    private Double spfjyZbzTySq;
 
     @ApiModelProperty(value = "市区同比增长")
     @TableField("SPFJY_ZBZ_TY_SQ_TB")
-    private BigDecimal spfjyZbzTySqTb;
+    private Double spfjyZbzTySqTb;
 
     @ApiModelProperty(value = "市区住宅累计指标")
     @TableField("SPFJY_ZBZ_ZZ_TY_SQ")
-    private BigDecimal spfjyZbzZzTySq;
+    private Double spfjyZbzZzTySq;
 
     @ApiModelProperty(value = "市区住宅同比增长")
     @TableField("SPFJY_ZBZ_ZZ_TY_SQ_TB")
-    private BigDecimal spfjyZbzZzTySqTb;
+    private Double spfjyZbzZzTySqTb;
 
 }
