@@ -36,4 +36,12 @@ public class ExportDataPackage {
     List<Integer> yhbm_everyMonth_lysize_List;
 
     List<Double> yhbm_everyMonth_lylv_List;
+
+    List<Double> spfcj_taoshu_zz_list;
+
+    List<Double> spfcj_jj_zz_thisyear_list;
+
+    List<Double> spfcj_jj_zz_lastyear_list;
+
+    List<Double> pzks_mianJi_list;
 }
