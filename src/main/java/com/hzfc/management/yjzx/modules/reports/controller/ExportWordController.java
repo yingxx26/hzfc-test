@@ -356,8 +356,8 @@ public class ExportWordController {
         //全年均价——今年-市区
         dataFinal.put("spfcj_sum_jj_everyMonth_shiqu", new BigDecimal(spfcj_sum_jj_everyMonth_object.getSpfjyZbzTySq()).setScale(2, BigDecimal.ROUND_HALF_UP));
         //成交均价同比-全年度-市区
-        BigDecimal spfcj_hb_jj_thisyear_shiqu = new BigDecimal((float) ((spfcj_sum_jj_everyMonth_object.getSpfjyZbzTySq() - spfcj_sum_jj_everyMonth_lastyear.getSpfjyZbzTySq()) / spfcj_sum_jj_everyMonth_lastyear.getSpfjyZbzTySq()));
-        dataFinal.put("spfcj_hb_jj_thisyear_shiqu", spfcj_hb_jj_thisyear_shiqu.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        BigDecimal spfcj_tb_jj_thisyear_shiqu = new BigDecimal((float) ((spfcj_sum_jj_everyMonth_object.getSpfjyZbzTySq() - spfcj_sum_jj_everyMonth_lastyear.getSpfjyZbzTySq()) / spfcj_sum_jj_everyMonth_lastyear.getSpfjyZbzTySq()));
+        dataFinal.put("spfcj_tb_jj_thisyear_shiqu", spfcj_tb_jj_thisyear_shiqu.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
 
 
         /////////////////////商品房中住宅////////////////////////////////
@@ -513,8 +513,8 @@ public class ExportWordController {
         dataFinal.put("pzys_mj_thisMonth", pzys_mj_thisMonth.getYsPzysZbzTmAll());
 
         //预售套数tongbi
-        BigDecimal pzys_tb_taoShu_thisMonth = new BigDecimal((float) ((pzys_taoshu_thisMonth.getYsPzysZbzTmAll().floatValue() - pzys_taoshu_thisMonth.getYsPzysZbzTmLastyAll().floatValue()) / pzys_taoshu_thisMonth.getYsPzysZbzTmLastyAll().floatValue()));
-        dataFinal.put("pzys_tb_taoShu_thisMonth", pzys_tb_taoShu_thisMonth.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        BigDecimal pzys_tb_taoshu_thisMonth = new BigDecimal((float) ((pzys_taoshu_thisMonth.getYsPzysZbzTmAll().floatValue() - pzys_taoshu_thisMonth.getYsPzysZbzTmLastyAll().floatValue()) / pzys_taoshu_thisMonth.getYsPzysZbzTmLastyAll().floatValue()));
+        dataFinal.put("pzys_tb_taoshu_thisMonth", pzys_tb_taoshu_thisMonth.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
         //预售面积tongbi
         BigDecimal pzys_hb_mj_thisMonth = new BigDecimal((float) ((pzys_mj_thisMonth.getYsPzysZbzTmAll().floatValue() - pzys_mj_thisMonth.getYsPzysZbzTmLastyAll().floatValue()) / pzys_mj_thisMonth.getYsPzysZbzTmLastyAll().floatValue()));
         dataFinal.put("pzys_tb_mj_thisMonth", pzys_hb_mj_thisMonth.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
@@ -1024,6 +1024,7 @@ public class ExportWordController {
         BigDecimal spfcj_hb_jj_thisMonth_shiqu = new BigDecimal((float) ((jj_thisMonth_shiqu.getSpfjyZbzTySq() - jj_lastMonth_shiqu.getSpfjyZbzTySq()) / jj_lastMonth_shiqu.getSpfjyZbzTySq()));
         dataFinal.put("spfcj_hb_jj_thisMonth_shiqu", spfcj_hb_jj_thisMonth_shiqu.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
  */
+
 
     }
 
