@@ -44,4 +44,16 @@ public class ExportDataPackage {
     List<Double> spfcj_jj_zz_lastyear_list;
 
     List<Double> pzks_mianJi_list;
+
+    List<Double> pzks_taoShu_list;
+
+    List<Double> mianJi_everyMonth_fzz_list;
+
+    List<Double> jj_everyMonth_fzz_list;
+
+    List<Double> pzks_mianJi_fzz_everyMonth_list;
+
+    List<Double> pzys_taoshu_zz_list;
+
+    List<Double> pzys_gongXiaoBi_zz_list;
 }
