@@ -60,6 +60,8 @@ hzfc:
     yh: 余杭区
     fy: 富阳区
     la: 临安区
+  cqid:
+    dhz: 330000
 
 
 socketio:
