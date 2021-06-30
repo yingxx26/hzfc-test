@@ -99,6 +99,12 @@ public class ExportWordController {
     @Autowired
     private ZhiBiaoSpfDwdjyxxCqDfService zhiBiaoSpfDwdjyxxCqDfService;
 
+    @Autowired
+    private ZhiBiaoClfDwdjyxxCqDfService zhiBiaoClfDwdjyxxCqDfService;
+
+    @Autowired
+    private ZhiBiaoEsfGpCqService zhiBiaoEsfGpCqService;
+
     @RequestMapping(value = "/exportUserWord/{templateId}", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult<String> exportUserWord(@PathVariable("templateId") Long templateId, @RequestBody ExportParam exportParam) {
@@ -191,11 +197,14 @@ public class ExportWordController {
 
     private ReportsWordTemplate showClf(Long templateId, Map<String, Object> dataFinal, LocalDate last, ExportDataPackage exportDataPackage) {
         ReportsWordTemplate reportsWordTemplate = reportsWordTemplateService.getById(templateId);
-        /*this.jiageZhishu_clf(reportsWordTemplate, dataFinal, last, exportDataPackage);
+        /*this.jiageZhishu_clf(reportsWordTemplate, dataFinal, last, exportDataPackage);*/
+        clfCjJieGou(dataFinal, last, exportDataPackage);
+        clfGuaPai(dataFinal, last, exportDataPackage);
         //渲染表格
-        this.dealTableClf_jiagezhishu(dataFinal, exportDataPackage);
+        //this.dealTableClf_jiagezhishu(dataFinal, exportDataPackage);
         //渲染图表
-        //this.dealChart(dataFinal);*/
+        //this.dealChart(dataFinal);
+
         return reportsWordTemplate;
     }
 
@@ -1108,7 +1117,7 @@ public class ExportWordController {
         Date lastMonthDate = DateUtil.localDate2Date(lastMonth);
         String lastMonth_yyyyMM_thisyear = DateUtil.format(lastMonthDate, "yyyy-MM");
         ////////////////////////////////成交结构/////////////////////////////////////////
-        //-住房
+        //-商品房 住房
         QueryWrapper<ZhiBiaoSpfDwdjyxxCqDf> wrapper6 = new QueryWrapper<>();
         LambdaQueryWrapper<ZhiBiaoSpfDwdjyxxCqDf> lambda6 = wrapper6.lambda();
         lambda6.ge(ZhiBiaoSpfDwdjyxxCqDf::getTjdate, firstMonth_yyyyMM_thisyear);
@@ -1135,8 +1144,8 @@ public class ExportWordController {
         dataFinal.put("cjJieGou_higher180_thismonth", new BigDecimal(cjJieGou_higher180_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
 
 
-        //上月-面积区间-套数-环比
-        /*List<ZhiBiaoSpfDwdjyxxCqDf> zhiBiaoSpfDwdjyxxCqDfList_spf_zz_lastmonth = zhiBiaoSpfDwdjyxxCqDfList.stream().filter(x -> lastMonth_yyyyMM_thisyear.equals(x.getTjdate())
+        /*//上月-面积区间-套数-环比
+        List<ZhiBiaoSpfDwdjyxxCqDf> zhiBiaoSpfDwdjyxxCqDfList_spf_zz_lastmonth = zhiBiaoSpfDwdjyxxCqDfList.stream().filter(x -> lastMonth_yyyyMM_thisyear.equals(x.getTjdate())
                 && "住宅".equals(x.getFwyt()) && "商品房".equals(x.getFcxz()) && dhz.equals(x.getCqid())).collect(Collectors.toList());
 
         Map<String, DoubleSummaryStatistics> spf_zz_mj_allmap_lastmonth = Optional.ofNullable(zhiBiaoSpfDwdjyxxCqDfList_spf_zz_lastmonth).get().stream().collect(Collectors.groupingBy(ZhiBiaoSpfDwdjyxxCqDf::getMjqj, Collectors.summarizingDouble(ZhiBiaoSpfDwdjyxxCqDf::getSpfhtTsCntTmCqid)));
@@ -1164,28 +1173,158 @@ public class ExportWordController {
         Double cjJieGou_higher180_lastmonth = spf_zz_mj_allmap_lastmonth.get("180以上").getSum() / spf_zz_mj_sum_lastmonth;
         BigDecimal cjJieGou_higher180_lastmonth_hb = new BigDecimal((cjJieGou_higher180_thismonth - cjJieGou_higher180_lastmonth) / cjJieGou_higher180_lastmonth);
         dataFinal.put("cjJieGou_higher180_lastmonth_hb", cjJieGou_higher180_lastmonth_hb.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
-*/
+        */
         //均价区间-套数
         Map<String, DoubleSummaryStatistics> spf_zz_jj_allmap_thismonth = Optional.ofNullable(zhiBiaoSpfDwdjyxxCqDfList_spf_zz_thismonth).get().stream().collect(Collectors.groupingBy(ZhiBiaoSpfDwdjyxxCqDf::getJjqj, Collectors.summarizingDouble(ZhiBiaoSpfDwdjyxxCqDf::getSpfhtTsCntTmCqid)));
-        Double cjJieGou_0_1_thismonth = spf_zz_jj_allmap_thismonth.get("0-0.5万").getSum() + spf_zz_jj_allmap_thismonth.get("0.5-1万").getSum() / spf_zz_mj_sum_thismonth;
+        Double cjJieGou_0_1_thismonth = (spf_zz_jj_allmap_thismonth.get("0-0.5万").getSum() + spf_zz_jj_allmap_thismonth.get("0.5-1万").getSum()) / spf_zz_mj_sum_thismonth;
         dataFinal.put("cjJieGou_0_1_thismonth", new BigDecimal(cjJieGou_0_1_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
-        Double cjJieGou_1_2_thismonth = spf_zz_jj_allmap_thismonth.get("1-1.5万").getSum() + spf_zz_jj_allmap_thismonth.get("1.5-2万").getSum() / spf_zz_mj_sum_thismonth;
+        Double cjJieGou_1_2_thismonth = (spf_zz_jj_allmap_thismonth.get("1-1.5万").getSum() + spf_zz_jj_allmap_thismonth.get("1.5-2万").getSum()) / spf_zz_mj_sum_thismonth;
         dataFinal.put("cjJieGou_1_2_thismonth", new BigDecimal(cjJieGou_1_2_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
-        Double cjJieGou_2_3_thismonth = spf_zz_jj_allmap_thismonth.get("2-2.5万").getSum() + spf_zz_jj_allmap_thismonth.get("2.5-3万").getSum() / spf_zz_mj_sum_thismonth;
+        Double cjJieGou_2_3_thismonth = (spf_zz_jj_allmap_thismonth.get("2-2.5万").getSum() + spf_zz_jj_allmap_thismonth.get("2.5-3万").getSum()) / spf_zz_mj_sum_thismonth;
         dataFinal.put("cjJieGou_2_3_thismonth", new BigDecimal(cjJieGou_2_3_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
-        Double cjJieGou_3_4_thismonth = spf_zz_jj_allmap_thismonth.get("3-3.5万").getSum() + spf_zz_jj_allmap_thismonth.get("3.5-4万").getSum() / spf_zz_mj_sum_thismonth;
+        Double cjJieGou_3_4_thismonth = (spf_zz_jj_allmap_thismonth.get("3-3.5万").getSum() + spf_zz_jj_allmap_thismonth.get("3.5-4万").getSum()) / spf_zz_mj_sum_thismonth;
         dataFinal.put("cjJieGou_3_4_thismonth", new BigDecimal(cjJieGou_3_4_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
-        Double cjJieGou_4_5_thismonth = spf_zz_jj_allmap_thismonth.get("4-4.5万").getSum() + spf_zz_jj_allmap_thismonth.get("4.5-5万").getSum() / spf_zz_mj_sum_thismonth;
+        Double cjJieGou_4_5_thismonth = (spf_zz_jj_allmap_thismonth.get("4-4.5万").getSum() + spf_zz_jj_allmap_thismonth.get("4.5-5万").getSum()) / spf_zz_mj_sum_thismonth;
         dataFinal.put("cjJieGou_4_5_thismonth", new BigDecimal(cjJieGou_4_5_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
         Double cjJieGou_higher5_thismonth = spf_zz_jj_allmap_thismonth.get("5万以上").getSum() / spf_zz_mj_sum_thismonth;
         dataFinal.put("cjJieGou_higher5_thismonth", new BigDecimal(cjJieGou_higher5_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
 
         dataFinal.put("cjJieGou_lower2_thismonth", new BigDecimal(cjJieGou_0_1_thismonth + cjJieGou_1_2_thismonth + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
 
-
-        System.out.println();
     }
 
+    private void clfCjJieGou(Map<String, Object> dataFinal, LocalDate thisDay, ExportDataPackage exportDataPackage) {
+        //综合今年数据
+        Date firstDayOfYearDate = DateUtil.localDate2Date(thisDay.with(TemporalAdjusters.firstDayOfYear()));
+        LocalDate thisMonthlastDay = thisDay.with(TemporalAdjusters.lastDayOfMonth());
+        Date thisMonthLastdayDate = DateUtil.localDate2Date(thisMonthlastDay);
+        String firstMonth_yyyyMM_thisyear = DateUtil.format(firstDayOfYearDate, "yyyy-MM");
+        String thisMonth_yyyyMM_thisyear = DateUtil.format(thisMonthLastdayDate, "yyyy-MM");
+        LocalDate lastMonth = thisDay.minusMonths(1);
+        Date lastMonthDate = DateUtil.localDate2Date(lastMonth);
+        String lastMonth_yyyyMM_thisyear = DateUtil.format(lastMonthDate, "yyyy-MM");
+        //-二手房成交结构
+        QueryWrapper<ZhiBiaoClfDwdjyxxCqDf> wrapper7 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoClfDwdjyxxCqDf> lambda7 = wrapper7.lambda();
+        lambda7.ge(ZhiBiaoClfDwdjyxxCqDf::getTjdate, firstMonth_yyyyMM_thisyear);
+        lambda7.le(ZhiBiaoClfDwdjyxxCqDf::getTjdate, thisMonth_yyyyMM_thisyear);
+        List<ZhiBiaoClfDwdjyxxCqDf> zhiBiaoClfDwdjyxxCqDfList = zhiBiaoClfDwdjyxxCqDfService.list(lambda7);
+
+        List<ZhiBiaoClfDwdjyxxCqDf> zhiBiaoClfDwdjyxxCqDfList_clf_zz_thismonth = zhiBiaoClfDwdjyxxCqDfList.stream().filter(x -> thisMonth_yyyyMM_thisyear.equals(x.getTjdate())
+                && "住宅".equals(x.getFwyt()) && dhz.equals(x.getCqid())).collect(Collectors.toList());
+
+        //面积区间-套数
+        Map<String, DoubleSummaryStatistics> clf_zz_mj_allmap_thismonth = Optional.ofNullable(zhiBiaoClfDwdjyxxCqDfList_clf_zz_thismonth).get().stream().collect(Collectors.groupingBy(ZhiBiaoClfDwdjyxxCqDf::getMjqj, Collectors.summarizingDouble(ZhiBiaoClfDwdjyxxCqDf::getClfhtTsCntTmCqid)));
+        Double clf_zz_mj_sum_thismonth = Optional.ofNullable(zhiBiaoClfDwdjyxxCqDfList_clf_zz_thismonth).get().stream().mapToDouble(ZhiBiaoClfDwdjyxxCqDf::getClfhtTsCntTmCqid).sum();
+        Double cjJieGou_lower60_thismonth_clf = clf_zz_mj_allmap_thismonth.get("60以下").getSum() / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_lower60_thismonth_clf", new BigDecimal(cjJieGou_lower60_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_60_90_thismonth_clf = clf_zz_mj_allmap_thismonth.get("60-90").getSum() / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_60_90_thismonth_clf", new BigDecimal(cjJieGou_60_90_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_90_120_thismonth_clf = clf_zz_mj_allmap_thismonth.get("90-120").getSum() / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_90_120_thismonth_clf", new BigDecimal(cjJieGou_90_120_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_120_140_thismonth_clf = clf_zz_mj_allmap_thismonth.get("120-140").getSum() / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_120_140_thismonth_clf", new BigDecimal(cjJieGou_120_140_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_140_180_thismonth_clf = clf_zz_mj_allmap_thismonth.get("140-180").getSum() / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_140_180_thismonth_clf", new BigDecimal(cjJieGou_140_180_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_higher180_thismonth_clf = clf_zz_mj_allmap_thismonth.get("180以上").getSum() / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_higher180_thismonth_clf", new BigDecimal(cjJieGou_higher180_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+
+
+        //均价区间-套数
+        Map<String, DoubleSummaryStatistics> clf_zz_jj_allmap_thismonth = Optional.ofNullable(zhiBiaoClfDwdjyxxCqDfList_clf_zz_thismonth).get().stream().collect(Collectors.groupingBy(ZhiBiaoClfDwdjyxxCqDf::getJjqj, Collectors.summarizingDouble(ZhiBiaoClfDwdjyxxCqDf::getClfhtTsCntTmCqid)));
+        Double cjJieGou_0_1_thismonth_clf = (clf_zz_jj_allmap_thismonth.get("0-0.5万").getSum() + clf_zz_jj_allmap_thismonth.get("0.5-1万").getSum()) / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_0_1_thismonth_clf", new BigDecimal(cjJieGou_0_1_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_1_2_thismonth_clf = (clf_zz_jj_allmap_thismonth.get("1-1.5万").getSum() + clf_zz_jj_allmap_thismonth.get("1.5-2万").getSum()) / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_1_2_thismonth_clf", new BigDecimal(cjJieGou_1_2_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_2_3_thismonth_clf = (clf_zz_jj_allmap_thismonth.get("2-2.5万").getSum() + clf_zz_jj_allmap_thismonth.get("2.5-3万").getSum()) / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_2_3_thismonth_clf", new BigDecimal(cjJieGou_2_3_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_3_4_thismonth_clf = (clf_zz_jj_allmap_thismonth.get("3-3.5万").getSum() + clf_zz_jj_allmap_thismonth.get("3.5-4万").getSum()) / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_3_4_thismonth_clf", new BigDecimal(cjJieGou_3_4_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_4_5_thismonth_clf = (clf_zz_jj_allmap_thismonth.get("4-4.5万").getSum() + clf_zz_jj_allmap_thismonth.get("4.5-5万").getSum()) / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_4_5_thismonth_clf", new BigDecimal(cjJieGou_4_5_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_higher5_thismonth_clf = clf_zz_jj_allmap_thismonth.get("5万以上").getSum() / clf_zz_mj_sum_thismonth;
+        dataFinal.put("cjJieGou_higher5_thismonth_clf", new BigDecimal(cjJieGou_higher5_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        Double cjJieGou_lower2_thismonth_clf = new BigDecimal(cjJieGou_0_1_thismonth_clf + cjJieGou_1_2_thismonth_clf + "").multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        dataFinal.put("cjJieGou_lower2_thismonth_clf", cjJieGou_lower2_thismonth_clf + "%");
+
+
+        //上月-面积区间-套数-环比
+        /*List<ZhiBiaoClfDwdjyxxCqDf> zhiBiaoClfDwdjyxxCqDfList_clf_zz_lastmonth = zhiBiaoClfDwdjyxxCqDfList.stream().filter(x -> lastMonth_yyyyMM_thisyear.equals(x.getTjdate())
+                && "住宅".equals(x.getFwyt()) && dhz.equals(x.getCqid())).collect(Collectors.toList());
+
+        Map<String, DoubleSummaryStatistics> clf_zz_jj_allmap_lastmonth = Optional.ofNullable(zhiBiaoClfDwdjyxxCqDfList_clf_zz_lastmonth).get().stream().collect(Collectors.groupingBy(ZhiBiaoClfDwdjyxxCqDf::getJjqj, Collectors.summarizingDouble(ZhiBiaoClfDwdjyxxCqDf::getClfhtTsCntTmCqid)));
+        Double clf_zz_mj_sum_lastmonth = Optional.ofNullable(zhiBiaoClfDwdjyxxCqDfList_clf_zz_lastmonth).get().stream().mapToDouble(ZhiBiaoClfDwdjyxxCqDf::getClfhtTsCntTmCqid).sum();
+        Double cjJieGou_lower2_lastmonth_clf = (clf_zz_jj_allmap_lastmonth.get("0-0.5万").getSum() + clf_zz_jj_allmap_lastmonth.get("0.5-1万").getSum() + clf_zz_jj_allmap_lastmonth.get("1-1.5万").getSum() + clf_zz_jj_allmap_lastmonth.get("1.5-2万").getSum()) / clf_zz_mj_sum_lastmonth;
+        BigDecimal cjJieGou_lower2_lastmonth_clf_hb = new BigDecimal((cjJieGou_lower2_thismonth_clf - cjJieGou_lower2_lastmonth_clf) / cjJieGou_lower2_lastmonth_clf);
+        dataFinal.put("cjJieGou_lower2_lastmonth_clf_hb", cjJieGou_lower2_lastmonth_clf_hb.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+
+        Double cjJieGou_2_3_lastmonth_clf = (clf_zz_jj_allmap_lastmonth.get("2-2.5万").getSum() + clf_zz_jj_allmap_lastmonth.get("2.5-3万").getSum()) / clf_zz_mj_sum_lastmonth;
+        BigDecimal cjJieGou_2_3_lastmonth_clf_hb = new BigDecimal((cjJieGou_2_3_thismonth_clf - cjJieGou_2_3_lastmonth_clf) / cjJieGou_2_3_lastmonth_clf);
+        dataFinal.put("cjJieGou_2_3_lastmonth_clf_hb", cjJieGou_2_3_lastmonth_clf_hb.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+
+        Double cjJieGou_3_4_lastmonth_clf = (clf_zz_jj_allmap_lastmonth.get("3-3.5万").getSum() + clf_zz_jj_allmap_lastmonth.get("3.5-4万").getSum()) / clf_zz_mj_sum_lastmonth;
+        BigDecimal cjJieGou_3_4_lastmonth_clf_hb = new BigDecimal((cjJieGou_3_4_thismonth_clf - cjJieGou_3_4_lastmonth_clf) / cjJieGou_3_4_lastmonth_clf);
+        dataFinal.put("cjJieGou_3_4_lastmonth_clf_hb", cjJieGou_3_4_lastmonth_clf_hb.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+
+        Double cjJieGou_4_5_lastmonth_clf = (clf_zz_jj_allmap_lastmonth.get("4-4.5万").getSum() + clf_zz_jj_allmap_lastmonth.get("4.5-5万").getSum()) / clf_zz_mj_sum_lastmonth;
+        BigDecimal cjJieGou_4_5_lastmonth_clf_hb = new BigDecimal((cjJieGou_4_5_thismonth_clf - cjJieGou_4_5_lastmonth_clf) / cjJieGou_4_5_lastmonth_clf);
+        dataFinal.put("cjJieGou_4_5_lastmonth_clf_hb", cjJieGou_4_5_lastmonth_clf_hb.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+
+        Double cjJieGou_higher5_lastmonth_clf = clf_zz_jj_allmap_lastmonth.get("5万以上").getSum() / clf_zz_mj_sum_lastmonth;
+        BigDecimal cjJieGou_higher5_lastmonth_clf_hb = new BigDecimal((cjJieGou_higher5_thismonth_clf - cjJieGou_higher5_lastmonth_clf) / cjJieGou_higher5_lastmonth_clf);
+        dataFinal.put("cjJieGou_higher5_lastmonth_clf_hb", cjJieGou_higher5_lastmonth_clf_hb.multiply(new BigDecimal("100")).setScale(2, BigDecimal.ROUND_HALF_UP) + "%");
+        System.out.println();*/
+
+    }
+
+    private void clfGuaPai(Map<String, Object> dataFinal, LocalDate thisDay, ExportDataPackage exportDataPackage) {
+        //综合今年数据
+        Date firstDayOfYearDate = DateUtil.localDate2Date(thisDay.with(TemporalAdjusters.firstDayOfYear()));
+        LocalDate thisMonthlastDay = thisDay.with(TemporalAdjusters.lastDayOfMonth());
+        Date thisMonthLastdayDate = DateUtil.localDate2Date(thisMonthlastDay);
+        String firstMonth_yyyyMM_thisyear = DateUtil.format(firstDayOfYearDate, "yyyy-MM");
+        String thisMonth_yyyyMM_thisyear = DateUtil.format(thisMonthLastdayDate, "yyyy-MM");
+        LocalDate lastMonth = thisDay.minusMonths(1);
+        Date lastMonthDate = DateUtil.localDate2Date(lastMonth);
+        String lastMonth_yyyyMM_thisyear = DateUtil.format(lastMonthDate, "yyyy-MM");
+        //-二手房挂牌
+        //ZhiBiaoEsfGpCq
+        QueryWrapper<ZhiBiaoEsfGpCq> wrapper5 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoEsfGpCq> lambda5 = wrapper5.lambda();
+        lambda5.ge(ZhiBiaoEsfGpCq::getTjsj, firstMonth_yyyyMM_thisyear);
+        lambda5.le(ZhiBiaoEsfGpCq::getTjsj, thisMonth_yyyyMM_thisyear);
+        List<ZhiBiaoEsfGpCq> zhiBiaoEsfGpCqList = zhiBiaoEsfGpCqService.list(wrapper5);
+        ////可售图表数据-
+
+        //全市二手房已挂牌未成交房源套数
+        ZhiBiaoEsfGpCq esfgp_wcj_taoshu_thisMonth = zhiBiaoEsfGpCqList.stream().filter(x -> thisMonth_yyyyMM_thisyear.equals(x.getTjsj()) && "已挂牌未成交套数".equals(x.getZbname())).findFirst().get();
+        dataFinal.put("esfgp_wcj_taoshu_thisMonth", esfgp_wcj_taoshu_thisMonth.getEsfGpZbzTmAll().longValue());
+
+        //全市二手房已挂牌未成交房源面积
+        ZhiBiaoEsfGpCq esfgp_wcj_mj_thisMonth = zhiBiaoEsfGpCqList.stream().filter(x -> thisMonth_yyyyMM_thisyear.equals(x.getTjsj()) && "已挂牌未成交面积".equals(x.getZbname())).findFirst().get();
+        dataFinal.put("esfgp_wcj_mj_thisMonth", esfgp_wcj_mj_thisMonth.getEsfGpZbzTmAll().longValue());
+
+        //市区二手住房已挂牌未成交房源taoshu
+        ZhiBiaoEsfGpCq esfgp_zz_wcj_taoshu_thisMonth = zhiBiaoEsfGpCqList.stream().filter(x -> thisMonth_yyyyMM_thisyear.equals(x.getTjsj()) && "二手房住宅已挂牌未成交套数".equals(x.getZbname())).findFirst().get();
+        dataFinal.put("esfgp_zz_wcj_taoshu_thisMonth", esfgp_zz_wcj_taoshu_thisMonth.getEsfGpZbzTmSq().longValue());
+
+        //市区二手住房已挂牌未成交房源mianji
+        ZhiBiaoEsfGpCq esfgp_zz_wcj_mj_thisMonth = zhiBiaoEsfGpCqList.stream().filter(x -> thisMonth_yyyyMM_thisyear.equals(x.getTjsj()) && "二手房住宅已挂牌未成交面积".equals(x.getZbname())).findFirst().get();
+        dataFinal.put("esfgp_zz_wcj_mj_thisMonth", esfgp_zz_wcj_mj_thisMonth.getEsfGpZbzTmSq().longValue());
+
+        //去化周期
+        dataFinal.put("esfgp_qhzq_wcj_taoshu_thisMonth", esfgp_wcj_taoshu_thisMonth.getEsfFpZbzQhzq().longValue());
+        //住宅去化周期
+        dataFinal.put("esfgp_zz_qhzq_wcj_taoshu_thisMonth", esfgp_zz_wcj_taoshu_thisMonth.getEsfFpZbzQhzq().longValue());
+
+        ZhiBiaoEsfGpCq esfgp_wcj_taoshu_lastMonth = zhiBiaoEsfGpCqList.stream().filter(x -> lastMonth_yyyyMM_thisyear.equals(x.getTjsj()) && "已挂牌未成交套数".equals(x.getZbname())).findFirst().get();
+        ZhiBiaoEsfGpCq esfgp_wcj_mj_lastMonth = zhiBiaoEsfGpCqList.stream().filter(x -> lastMonth_yyyyMM_thisyear.equals(x.getTjsj()) && "已挂牌未成交面积".equals(x.getZbname())).findFirst().get();
+
+        //套数环比
+        Double esfgp_hb_wcj_taoshu_lastMonth = esfgp_wcj_taoshu_thisMonth.getEsfGpZbzTmAll() - esfgp_wcj_taoshu_lastMonth.getEsfGpZbzTmAll();
+        dataFinal.put("esfgp_hb_wcj_taoshu_lastMonth", esfgp_hb_wcj_taoshu_lastMonth);
+
+    }
 
     private void yhbm(Map<String, Object> dataFinal, LocalDate last, ExportDataPackage exportDataPackage) {
 

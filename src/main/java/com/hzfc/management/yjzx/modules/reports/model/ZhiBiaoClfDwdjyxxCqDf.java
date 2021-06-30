@@ -27,8 +27,8 @@ public class ZhiBiaoClfDwdjyxxCqDf implements Serializable {
 
 
     @ApiModelProperty(value = "统计时间")
-    @TableField("TJSJ")
-    private String tjsj;
+    @TableField("TJDATE")
+    private String tjdate;
 
     @ApiModelProperty(value = "城区ID")
     @TableField("CQID")
