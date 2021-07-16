@@ -56,4 +56,20 @@ public class ExportDataPackage {
     List<Double> pzys_taoshu_zz_list;
 
     List<Double> pzys_gongXiaoBi_zz_list;
+
+    List<String> spfcj_cjJieGou_mj_zz_list;
+
+    List<Double> spfcj_cjJieGou_mj_zz_datalist;
+
+    List<String> spfcj_cjJieGou_jj_zz_list;
+
+    List<Double> spfcj_cjJieGou_jj_zz_datalist;
+
+    List<String> clf_cjJieGou_mj_zz_list;
+
+    List<Double> clf_cjJieGou_mj_zz_datalist;
+
+    List<String> clf_cjJieGou_jj_zz_list;
+
+    List<Double> clf_cjJieGou_jj_zz_datalist;
 }
