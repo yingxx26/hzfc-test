@@ -107,6 +107,9 @@ public class ExportWordController {
     @Autowired
     private ZhiBiaoSpfXqSheNdService zhiBiaoSpfXqSheNdService;
 
+    @Autowired
+    private ZhiBiaoGyDwDxxCqDfService zhiBiaoGyDwDxxCqDfService;
+
 
     @RequestMapping(value = "/exportUserWord/{templateId}", method = RequestMethod.POST)
     @ResponseBody
@@ -192,6 +195,7 @@ public class ExportWordController {
         this.yhbm(dataFinal, last, exportDataPackage);
         this.spfcj(dataFinal, last, exportDataPackage);
         this.spfxqcj(dataFinal, last);
+        this.spfCqGy(dataFinal, last);
         this.spfcjJieGou(dataFinal, last, exportDataPackage);
         //渲染表格
         this.dealTableSpf_jiagezhishu(dataFinal, exportDataPackage);
@@ -1157,6 +1161,42 @@ public class ExportWordController {
         Long firstXqXmTs = firstXq.getValue();
         ZhiBiaoSpfXqSheqNd zhiBiaoSpfXqSheqNd = zhiBiaoSpfXqSheqNdList.stream().filter(x -> firstXqXm.equals(x.getXqmc())).findFirst().get();
         String firstXqDistrict = zhiBiaoSpfXqSheqNd.getDistrict();
+        System.out.println();
+    }
+
+    private void spfCqGy(Map<String, Object> dataFinal, LocalDate thisDay) {
+        //小区销售套数
+        QueryWrapper<ZhiBiaoGyDwDxxCqDf> wrapper12 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoGyDwDxxCqDf> lambda12 = wrapper12.lambda();
+        LocalDate thisMonthFirstDay = thisDay.with(TemporalAdjusters.firstDayOfMonth());
+        Date thisMonthFirstdayDate = DateUtil.localDate2Date(thisMonthFirstDay);
+        String thisMonth_yyyyMMdd_thisyear = DateUtil.format(thisMonthFirstdayDate, "yyyy-MM");
+        lambda12.eq(ZhiBiaoGyDwDxxCqDf::getTjdate, thisMonth_yyyyMMdd_thisyear);
+        List<ZhiBiaoGyDwDxxCqDf> zhiBiaoGyDwDxxCqDfList = zhiBiaoGyDwDxxCqDfService.list(wrapper12);
+        if (CollectionUtils.isEmpty(zhiBiaoGyDwDxxCqDfList)) {
+            return;
+        }
+
+        Map<String, LongSummaryStatistics> spf_zz_ts_cq_thismonth = Optional.ofNullable(zhiBiaoGyDwDxxCqDfList).get().stream().distinct().filter(x -> !StringUtils.isEmpty(x.getCqmc())).collect(Collectors.groupingBy(ZhiBiaoGyDwDxxCqDf::getCqmc, Collectors.summarizingLong(ZhiBiaoGyDwDxxCqDf::getGyTsCntTmCqid)));
+
+        Map<String, Long> spf_zz_ts_cq_thismonth_collect = spf_zz_ts_cq_thismonth.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getSum()));
+        //排序
+        Map<String, Long> spf_zz_ts_cq_thismonth_collect_sorted = spf_zz_ts_cq_thismonth_collect.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldVal, newVal) -> oldVal,
+                        LinkedHashMap::new));
+        //java 8
+        int size = spf_zz_ts_cq_thismonth_collect_sorted.size();
+        Map<Integer, Map.Entry<String, Long>> spf_zz_ts_cq_thismonth_collect_sorted_finalmap = new HashMap<>();
+        for (Map.Entry<String, Long> entry : spf_zz_ts_cq_thismonth_collect_sorted.entrySet()) {
+            spf_zz_ts_cq_thismonth_collect_sorted_finalmap.put(size--, entry);
+        }
+        Map.Entry<String, Long> firstCq = spf_zz_ts_cq_thismonth_collect_sorted_finalmap.get(1);
+        String firstCqXm = firstCq.getKey();
+        Long firstXqXmTs = firstCq.getValue();
         System.out.println();
     }
 
