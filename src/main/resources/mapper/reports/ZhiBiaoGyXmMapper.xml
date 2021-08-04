@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzfc.management.yjzx.modules.reports.mapper.ZhiBiaoGyXmMapper">
+
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hzfc.management.yjzx.modules.reports.dto.Gyxm">
+        <result column="ysxmcode" property="YSXMCODE"/>
+        <result column="lpmc" property="LPMC"/>
+        <result column="fwcount" property="FWCOUNT"/>
+    </resultMap>
+
+    <select id="getGyxmList" resultType="com.hzfc.management.yjzx.modules.reports.dto.Gyxm">
+        SELECT DISTINCT
+              a.YSXMCODE,
+              c.LPMC,
+              count( DISTINCT b.fwcode ) FWCOUNT
+            FROM
+              HZ_TEST.TPC_YSXKZ_VIEW a
+              LEFT JOIN HZ_TEST.TPC_YSFH_VIEW b ON a.FLAG = b.FLAG
+              AND a.YSXMCODE = b.YSXMCODE
+              LEFT JOIN HZ_TEST.TPC_YSXM_VIEW c ON a.FLAG = c.FLAG
+              AND a.YSXMCODE = c.CODE
+            WHERE
+              b.pzkszt = '1010'
+              AND b.fcxz = '3901'
+              AND b.fwyt LIKE '10%'
+              AND TO_CHAR( a.SCQFRQ, 'yyyymm' ) = #{yyyymm}
+            GROUP BY
+              a.YSXMCODE,
+              c.LPMC
+            ORDER BY count( DISTINCT b.fwcode )  desc
+    </select>
+
+</mapper>

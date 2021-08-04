@@ -110,6 +110,8 @@ public class ExportWordController {
     @Autowired
     private ZhiBiaoGyDwDxxCqDfService zhiBiaoGyDwDxxCqDfService;
 
+    @Autowired
+    private ZhiBiaoGyXmService zhiBiaoGyXmService;
 
     @RequestMapping(value = "/exportUserWord/{templateId}", method = RequestMethod.POST)
     @ResponseBody
@@ -621,17 +623,21 @@ public class ExportWordController {
 
         ///////商品房预售-全市-住宅
         //图标数据-批准套数
-        List<ZhiBiaoSpfPzYs> pzys_taoshu_everyMonth_zz_list = zhiBiaoSpfPzYsCqList.stream().filter(x -> x.getTjsj().compareTo(firstMonth_yyyyMM_thisyear) >= 0 && "批准预售套数-住宅".equals(x.getZbname())).distinct().collect(Collectors.toList());
+
+        List<ZhiBiaoSpfPzYs> pzys_taoshu_everyMonth_zz_list = zhiBiaoSpfPzYsCqList.stream().filter(x -> x.getTjsj().compareTo(firstMonth_yyyyMM_thisyear) >= 0 && "批准预售套数-住宅".equals(x.getZbname())).sorted(Comparator.comparing(ZhiBiaoSpfPzYs::getTjsj)).distinct().collect(Collectors.toList());
         List<Double> pzys_taoshu_zz_list = pzys_taoshu_everyMonth_zz_list.stream().map(x -> x.getYsPzysZbzTmAll()).collect(Collectors.toList());
         exportDataPackage.setPzys_taoshu_zz_list(pzys_taoshu_zz_list);
         //图标数据-供销比
         //Map<String, ZhiBiaoSpfjyZhCq> pzys_taoshu_everyMonth_zz_objectMap = spfcj_taoshu_everyMonth_list.stream().collect(Collectors.toMap(ZhiBiaoSpfjyZhCq::getTjsj, Function.identity()));
         Map<String, ZhiBiaoSpfjyZhCq> pzys_taoshu_everyMonth_zz_objectMap = spfcj_taoshu_everyMonth_list.stream().distinct().collect(Collectors.toMap(ZhiBiaoSpfjyZhCq::getTjsj, Function.identity(), (oldValue, newValue) -> newValue));
 
+
         List<Double> pzys_gongXiaoBi_zz_list = pzys_taoshu_everyMonth_zz_list.stream().map(x ->
                 new BigDecimal(x.getYsPzysZbzTmAll() / pzys_taoshu_everyMonth_zz_objectMap.get(x.getTjsj()).getSpfjyZbzZzTyCq()).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue()
         ).collect(Collectors.toList());
+        //本月供销比 pzys_gongXiaoBi_zz_list最后一个
         exportDataPackage.setPzys_gongXiaoBi_zz_list(pzys_gongXiaoBi_zz_list);
+        dataFinal.put("gxb", pzys_gongXiaoBi_zz_list.get(pzys_gongXiaoBi_zz_list.size() - 1));
 
 
         //预售套数
@@ -1153,14 +1159,33 @@ public class ExportWordController {
         //java 8
         int size = spf_zz_ts_xq_thismonth_collect_sorted.size();
         Map<Integer, Map.Entry<String, Long>> spf_zz_ts_xq_thismonth_collect_sorted_finalmap = new HashMap<>();
+        List<String> allXqXm = new ArrayList<String>();
         for (Map.Entry<String, Long> entry : spf_zz_ts_xq_thismonth_collect_sorted.entrySet()) {
             spf_zz_ts_xq_thismonth_collect_sorted_finalmap.put(size--, entry);
+            allXqXm.add(entry.getKey());
         }
         Map.Entry<String, Long> firstXq = spf_zz_ts_xq_thismonth_collect_sorted_finalmap.get(1);
         String firstXqXm = firstXq.getKey();
-        Long firstXqXmTs = firstXq.getValue();
+        dataFinal.put("firstXqXm", firstXqXm + "");
+        Long firstXqTs = firstXq.getValue();
+        dataFinal.put("firstXqTs", firstXqTs + "");
         ZhiBiaoSpfXqSheqNd zhiBiaoSpfXqSheqNd = zhiBiaoSpfXqSheqNdList.stream().filter(x -> firstXqXm.equals(x.getXqmc())).findFirst().get();
         String firstXqDistrict = zhiBiaoSpfXqSheqNd.getDistrict();
+        dataFinal.put("firstXqDistrict", firstXqDistrict + "");
+        List<String> top10XqXm = allXqXm.subList(0, 9);
+        List<Map<String, String>> top10XqXmList = new ArrayList<Map<String, String>>();
+        for (int i = 0; i < top10XqXm.size(); i++) {
+            String aString = top10XqXm.get(i);
+            Map<String, String> map = new HashMap<String, String>();
+            if (i == 0) {
+                map.put("top10XqXmData", aString);
+            } else {
+                map.put("top10XqXmData", "、" + aString);
+            }
+            top10XqXmList.add(map);
+        }
+
+        dataFinal.put("top10XqXmList", top10XqXmList);
         System.out.println();
     }
 
@@ -1177,7 +1202,7 @@ public class ExportWordController {
             return;
         }
 
-        Map<String, LongSummaryStatistics> spf_zz_ts_cq_thismonth = Optional.ofNullable(zhiBiaoGyDwDxxCqDfList).get().stream().distinct().filter(x -> !StringUtils.isEmpty(x.getCqmc())).collect(Collectors.groupingBy(ZhiBiaoGyDwDxxCqDf::getCqmc, Collectors.summarizingLong(ZhiBiaoGyDwDxxCqDf::getGyTsCntTmCqid)));
+        Map<String, LongSummaryStatistics> spf_zz_ts_cq_thismonth = Optional.ofNullable(zhiBiaoGyDwDxxCqDfList).get().stream().distinct().filter(x -> !StringUtils.isEmpty(x.getCqmc()) && !"市区".equals(x.getCqmc()) && !"主城区".equals(x.getCqmc()) && !"大杭州".equals(x.getCqmc()) && "住宅".equals(x.getFwyt())).collect(Collectors.groupingBy(ZhiBiaoGyDwDxxCqDf::getCqmc, Collectors.summarizingLong(ZhiBiaoGyDwDxxCqDf::getGyTsCntTmCqid)));
 
         Map<String, Long> spf_zz_ts_cq_thismonth_collect = spf_zz_ts_cq_thismonth.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getSum()));
         //排序
@@ -1196,7 +1221,27 @@ public class ExportWordController {
         }
         Map.Entry<String, Long> firstCq = spf_zz_ts_cq_thismonth_collect_sorted_finalmap.get(1);
         String firstCqXm = firstCq.getKey();
-        Long firstXqXmTs = firstCq.getValue();
+        dataFinal.put("firstCqXm", firstCqXm);
+        Long firstCqTs = firstCq.getValue();
+        dataFinal.put("firstCqTs", firstCqTs);
+        ZhiBiaoGyDwDxxCqDf zhiBiaoGyDwDxxCqDf = zhiBiaoGyDwDxxCqDfList.stream().filter(x -> firstCqXm.equals(x.getCqmc())).findFirst().get();
+        Double firstCqMj = zhiBiaoGyDwDxxCqDf.getGyMjAmtTmCqid();
+        dataFinal.put("firstCqMj", firstCqMj);
+
+        Map.Entry<String, Long> secondCq = spf_zz_ts_cq_thismonth_collect_sorted_finalmap.get(2);
+        String secondCqXm = secondCq.getKey();
+        dataFinal.put("secondCqXm", secondCqXm);
+        Map.Entry<String, Long> thirdCq = spf_zz_ts_cq_thismonth_collect_sorted_finalmap.get(3);
+        String thirdCqXm = thirdCq.getKey();
+        dataFinal.put("thirdCqXm", thirdCqXm);
+
+        String thisMonth_yyyyMM_thisyear = DateUtil.format(thisMonthFirstdayDate, "yyyyMM");
+        Gyxm gyxm = zhiBiaoGyXmService.getGyxmList(thisMonth_yyyyMM_thisyear);
+        String lpmc = gyxm.getLpmc();
+        Long fwcount = gyxm.getFwcount();
+        dataFinal.put("lpmc", lpmc);
+        dataFinal.put("fwcount", fwcount);
+
         System.out.println();
     }
 
@@ -1778,13 +1823,22 @@ public class ExportWordController {
         //当年总报名人数
         Long yhbm_zbmsize = sourceListThis.stream().filter(x -> x.getBmrs() != null).mapToLong(ZhiBiaoYhbm::getBmrs).sum();
         dataFinal.put("yhbm_zbmsize", yhbm_zbmsize.intValue());
-        //当年总无房人数
-        Long yhbm_wfsize = sourceListThis.stream().filter(x -> x.getWfbmrs() != null).mapToLong(ZhiBiaoYhbm::getWfbmrs).sum();
+        //当年总报名人数 去重
+        Long yhbm_qc_bmsize = sourceListThis.stream().filter(x -> x.getBmrs() != null).distinct().mapToLong(ZhiBiaoYhbm::getBmrs).sum();
+        dataFinal.put("yhbm_qc_bmsize", yhbm_qc_bmsize.intValue());
+        //当年总无房人数 去重
+        Long yhbm_wfsize = sourceListThis.stream().filter(x -> x.getWfbmrs() != null).distinct().mapToLong(ZhiBiaoYhbm::getWfbmrs).sum();
         dataFinal.put("yhbm_wfsize", yhbm_wfsize.intValue());
         //当年无房占比
-        BigDecimal yhbm_wfzb = new BigDecimal((float) yhbm_wfsize / yhbm_zbmsize).multiply(new BigDecimal("100")).setScale(1, BigDecimal.ROUND_HALF_UP);
-
+        BigDecimal yhbm_wfzb = new BigDecimal((float) yhbm_wfsize / yhbm_qc_bmsize).multiply(new BigDecimal("100")).setScale(1, BigDecimal.ROUND_HALF_UP);
         dataFinal.put("yhbm_wfzb", yhbm_wfzb + "%");
+
+        //当年总无房人数 去重
+        Long yhbm_rcsize = sourceListThis.stream().filter(x -> x.getRcbmrs() != null).distinct().mapToLong(ZhiBiaoYhbm::getRcbmrs).sum();
+        dataFinal.put("yhbm_rcsize", yhbm_rcsize.intValue());
+        //当年无房占比
+        BigDecimal yhbm_rczb = new BigDecimal((float) yhbm_rcsize / yhbm_qc_bmsize).multiply(new BigDecimal("100")).setScale(1, BigDecimal.ROUND_HALF_UP);
+        dataFinal.put("yhbm_rczb", yhbm_rczb + "%");
     }
 
 
