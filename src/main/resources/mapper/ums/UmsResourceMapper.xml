@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzfc.management.yjzx.modules.ums.mapper.UmsResourceMapper">
+<mapper namespace="com.hzfc.management.wyzj.modules.ums.mapper.UmsResourceMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.hzfc.management.yjzx.modules.ums.model.UmsResource">
+    <resultMap id="BaseResultMap" type="com.hzfc.management.wyzj.modules.ums.model.UmsResource">
         <id column="id" property="ID"/>
         <result column="createTime" property="CREATETIME"/>
         <result column="name" property="NAME"/>
@@ -12,7 +12,7 @@
         <result column="categoryId" property="CATEGORYID"/>
     </resultMap>
 
-    <select id="getResourceList" resultType="com.hzfc.management.yjzx.modules.ums.model.UmsResource">
+    <select id="getResourceList" resultType="com.hzfc.management.wyzj.modules.ums.model.UmsResource">
         SELECT
         distinct
             ur.id id,
@@ -22,10 +22,10 @@
             ur.description description,
             ur.categoryid categoryId
         FROM
-            hz_test.ums_admin_role_relation ar
-                LEFT JOIN hz_test.ums_role r ON ar.roleid = r.id
-                LEFT JOIN hz_test.ums_role_resource_relation rrr ON r.id = rrr.roleid
-                LEFT JOIN hz_test.ums_resource ur ON ur.id = rrr.resourceid
+            HZ_SZWY.ums_admin_role_relation ar
+                LEFT JOIN HZ_SZWY.ums_role r ON ar.roleid = r.id
+                LEFT JOIN HZ_SZWY.ums_role_resource_relation rrr ON r.id = rrr.roleid
+                LEFT JOIN HZ_SZWY.ums_resource ur ON ur.id = rrr.resourceid
         WHERE
             ar.adminid = #{adminId}
           AND ur.id IS NOT NULL
@@ -33,7 +33,7 @@
             ur.id*/
     </select>
 
-    <select id="getResourceListByRoleId" resultType="com.hzfc.management.yjzx.modules.ums.model.UmsResource">
+    <select id="getResourceListByRoleId" resultType="com.hzfc.management.wyzj.modules.ums.model.UmsResource">
         SELECT
             r.id id,
             r.createtime createTime,
@@ -42,8 +42,8 @@
             r.description description,
             r.categoryid categoryId
         FROM
-            hz_test.ums_role_resource_relation rrr
-                LEFT JOIN hz_test.ums_resource r ON rrr.resourceid = r.id
+            HZ_SZWY.ums_role_resource_relation rrr
+                LEFT JOIN HZ_SZWY.ums_resource r ON rrr.resourceid = r.id
         WHERE
             rrr.roleid = #{roleId}
           AND r.id IS NOT NULL

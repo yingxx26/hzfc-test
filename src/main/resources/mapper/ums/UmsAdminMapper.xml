@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzfc.management.yjzx.modules.ums.mapper.UmsAdminMapper">
+<mapper namespace="com.hzfc.management.wyzj.modules.ums.mapper.UmsAdminMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.hzfc.management.yjzx.modules.ums.model.UmsAdmin">
+    <resultMap id="BaseResultMap" type="com.hzfc.management.wyzj.modules.ums.model.UmsAdmin">
         <id column="id" property="ID" />
         <result column="username" property="USERNAME" />
         <result column="password" property="PASSWORD" />
@@ -20,8 +20,8 @@
         SELECT
             DISTINCT ar.adminid
         FROM
-            hz_test.ums_role_resource_relation rr
-                LEFT JOIN hz_test.ums_admin_role_relation ar ON rr.roleid = ar.roleid
+            HZ_SZWY.ums_role_resource_relation rr
+                LEFT JOIN HZ_SZWY.ums_admin_role_relation ar ON rr.roleid = ar.roleid
         WHERE rr.resourceid=#{resourceId}
     </select>
 

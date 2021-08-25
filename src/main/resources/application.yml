@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: management-yjzx
+    name: management-wyzj
   profiles:
     active: dev
 
@@ -23,10 +23,10 @@ jwt:
   tokenHead: 'Bearer '  #JWT负载中拿到开头
 
 redis:
-  database: management
+  database: szwy
   key:
-    admin: 'ums:admin'
-    resourceList: 'ums:resourceList'
+    admin: 'szwy:ums:admin'
+    resourceList: 'szwy:ums:resourceList'
   expire:
     common: 86400 # 24小时
 
