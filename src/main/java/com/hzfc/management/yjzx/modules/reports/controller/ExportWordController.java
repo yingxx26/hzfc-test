@@ -28,6 +28,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 导出Word
@@ -115,6 +116,10 @@ public class ExportWordController {
 
     @Autowired
     private ZhiBiaoEsfJyShiQuService zhiBiaoEsfJyShiQuService;
+
+    @Autowired
+    private ZhiBiaoClfRdxqCqDfService zhiBiaoClfRdxqCqDfService;
+
 
     @RequestMapping(value = "/exportUserWord/{templateId}", method = RequestMethod.POST)
     @ResponseBody
@@ -1217,6 +1222,31 @@ public class ExportWordController {
         dataFinal.put("esf_tb_jj_everyMonth_shiqu", NumUtils.DoubleFormat(esf_tb_jj_everyMonth_shiqu, 1) + "%");
 
 
+        //二手房热点小区
+        QueryWrapper<ZhiBiaoClfRdxqCqDf> wrapper17 = new QueryWrapper<>();
+        LambdaQueryWrapper<ZhiBiaoClfRdxqCqDf> lambda17 = wrapper17.lambda();
+        LocalDate thisMonthFirstDay = thisDay.with(TemporalAdjusters.firstDayOfMonth());
+        Date thisMonthFirstDayDate = DateUtil.localDate2Date(thisMonthFirstDay);
+        lambda17.ge(ZhiBiaoClfRdxqCqDf::getHtbasj, firstDayOfYearDate);
+        lambda17.le(ZhiBiaoClfRdxqCqDf::getHtbasj, thisMonthFirstDayDate);
+        List<ZhiBiaoClfRdxqCqDf> zhiBiaoClfRdxqCqDfList = zhiBiaoClfRdxqCqDfService.list(lambda17);
+
+        Date thisMonthFirstdayDate = DateUtil.localDate2Date(thisMonthFirstDay);
+        String thisMonthFirstDay_yyyyMMdd_thisyear = DateUtil.format(thisMonthFirstdayDate, "yyyy-MM-dd");
+
+        List<ZhiBiaoClfRdxqCqDf> esf_taoshu_thisMonth_shiqu_top2 = zhiBiaoClfRdxqCqDfList.stream().filter(x -> thisMonthFirstDay_yyyyMMdd_thisyear.equals(DateUtil.format(x.getHtbasj(), "yyyy-MM-dd"))).distinct().sorted(Comparator.comparing(ZhiBiaoClfRdxqCqDf::getClfhtTsCntCqid).reversed()).limit(2).collect(Collectors.toList());
+
+        ZhiBiaoClfRdxqCqDf firstRdxq = esf_taoshu_thisMonth_shiqu_top2.get(0);
+        String esf_rdxq_firstXqmc = firstRdxq.getXqmc();
+        Double esf_rdxq_firstTs = firstRdxq.getClfhtTsCntCqid();
+        dataFinal.put("esf_rdxq_firstXqmc", esf_rdxq_firstXqmc);
+        dataFinal.put("esf_rdxq_firstTs", esf_rdxq_firstTs.intValue());
+
+        ZhiBiaoClfRdxqCqDf secondRdxq = esf_taoshu_thisMonth_shiqu_top2.get(1);
+        String esf_rdxq_secondXqmc = secondRdxq.getXqmc();
+        Double esf_rdxq_secondTs = secondRdxq.getClfhtTsCntCqid();
+        dataFinal.put("esf_rdxq_secondXqmc", esf_rdxq_secondXqmc);
+        dataFinal.put("esf_rdxq_secondTs", esf_rdxq_secondTs.intValue());
     }
 
     private void spfxqcj(Map<String, Object> dataFinal, LocalDate thisDay) {

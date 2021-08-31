@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -28,7 +29,7 @@ public class ZhiBiaoClfRdxqCqDf implements Serializable {
 
     @ApiModelProperty(value = "合同备案时间")
     @TableField("HTBASJ")
-    private String htbasj;
+    private Date htbasj;
 
     @ApiModelProperty(value = "维度名称")
     @TableField("WDNAME")
