@@ -1077,6 +1077,11 @@ public class ExportWordController {
         lambda4.le(ZhiBiaoEsfJy::getTjsj, thisMonth_yyyyMM_thisyear);
         List<ZhiBiaoEsfJy> zhiBiaoEsfJyList = zhiBiaoEsfJyService.list(wrapper4);
 
+        //图标数据
+        List<ZhiBiaoEsfJy> esf_taoshu_MonthList = zhiBiaoEsfJyList.stream().filter(x -> "本月套数".equals(x.getZbname())).distinct().sorted(Comparator.comparing(ZhiBiaoEsfJy::getTjsj)).collect(Collectors.toList());
+        List<Double> esf_taoshu_cjlist = esf_taoshu_MonthList.stream().map(x -> x.getEsfjyZbzZzCntTm()).collect(Collectors.toList());
+        exportDataPackage.setEsf_taoshu_cjlist(esf_taoshu_cjlist);//esfcjts
+
         //成交套数-全市-当月
         ZhiBiaoEsfJy esf_taoshu_thisMonth = zhiBiaoEsfJyList.stream().filter(x -> thisMonth_yyyyMM_thisyear.equals(x.getTjsj()) && "本月套数".equals(x.getZbname())).findFirst().get();
         dataFinal.put("esf_taoshu_thisMonth", esf_taoshu_thisMonth.getEsfjyZbzZzCntTm().intValue());
@@ -2490,7 +2495,11 @@ public class ExportWordController {
         List<String> clf_cjJieGou_jj_zz_list = exportDataPackage.getClf_cjJieGou_jj_zz_list();
         List<Double> clf_cjJieGou_jj_zz_datalist = exportDataPackage.getClf_cjJieGou_jj_zz_datalist();
 
+        List<Double> esf_taoshu_cjlist = exportDataPackage.getEsf_taoshu_cjlist();
+
+        List<String> yhbm_everyMonth_month_list = exportDataPackage.getYhbm_everyMonth_month_List();
         if (CollectionUtils.isEmpty(clf_cjJieGou_mj_zz_datalist) || CollectionUtils.isEmpty(clf_cjJieGou_jj_zz_datalist)
+                || CollectionUtils.isEmpty(esf_taoshu_cjlist)
         ) {
             return paramMap;
         }
@@ -2515,6 +2524,17 @@ public class ExportWordController {
         seriesRenderDatas9.add(new SeriesRenderData("百分比", clf_cjJieGou_jj_zz_datalist.toArray(new Double[clf_cjJieGou_jj_zz_datalist.size()])));
         bar9.setSeriesDatas(seriesRenderDatas9);
         paramMap.put("clfCjjgJjCharts", bar9);
+
+
+        //柱状图生成
+        ChartMultiSeriesRenderData bar10 = new ChartMultiSeriesRenderData();
+        bar10.setChartTitle("成交套数");
+        bar10.setCategories(yhbm_everyMonth_month_list.toArray(new String[yhbm_everyMonth_month_list.size()]));
+        //参数为数组
+        List<SeriesRenderData> seriesRenderDatas10 = new ArrayList<SeriesRenderData>();
+        seriesRenderDatas10.add(new SeriesRenderData("百分比", esf_taoshu_cjlist.toArray(new Double[esf_taoshu_cjlist.size()])));
+        bar10.setSeriesDatas(seriesRenderDatas10);
+        paramMap.put("esfcjts", bar10);
 
         return paramMap;
     }

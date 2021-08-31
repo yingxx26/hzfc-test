@@ -72,4 +72,6 @@ public class ExportDataPackage {
     List<String> clf_cjJieGou_jj_zz_list;
 
     List<Double> clf_cjJieGou_jj_zz_datalist;
+
+    List<Double> esf_taoshu_cjlist;
 }

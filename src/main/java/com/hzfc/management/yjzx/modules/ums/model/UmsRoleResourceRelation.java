@@ -25,7 +25,7 @@ public class UmsRoleResourceRelation implements Serializable {
 
     private static final long serialVersionUID=1L;
 
-    @TableId(value = "ID", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.INPUT)
     private Long id;
 
     @ApiModelProperty(value = "角色ID")
