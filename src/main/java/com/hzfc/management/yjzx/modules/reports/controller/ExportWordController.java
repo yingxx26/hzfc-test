@@ -1156,7 +1156,7 @@ public class ExportWordController {
         Double esf_jj_everyMonth_lastyear = esf_jj_thisMonth_lastyear.getEsfjyZbzZzCntTy();
 
         //成交套数同比-全市-当年
-        //todo 二手住宅成交
+        //todo 二手住宅成交同比
         Double esf_tb_taoshu_everyMonth = (esf_taoshu_everyMonth - esf_taoshu_everyMonth_lastyear) / esf_taoshu_everyMonth_lastyear;
         dataFinal.put("esf_tb_taoshu_everyMonth", NumUtils.DoubleFormat(esf_tb_taoshu_everyMonth, 1) + "%");
         //成交套数同比-全市-当年
@@ -1889,7 +1889,7 @@ public class ExportWordController {
         Map<String, String> yhbm_everyCq_pjzql_Map = new HashMap<String, String>();
         //计算城区统计
         List<Yhcqtj> yhcqtjList = new ArrayList<Yhcqtj>();
-        maplist_cq_this.forEach((k, v) -> {
+        maplist_cq_this.forEach((k, v) -> { //余杭->  ZhiBiaoYhbm(lpcq=余杭区, lpmc=新力启云府, yszh=null, bmkssj=Tue Jan 12 00:00:00 CST 2021, bmjssj=Thu Jan 14 00:00:00 CST 2021, yhjssj=Mon Jan 18 00:00:00 CST 2021, cjsj=Sun Jan 10 00:00:00 CST 2021, fys=118, bmrs=170, zql=0.69, rcfys=23, rcbmrs=0, rxzql=null, wffys=59, wfbmrs=65, wfzql=0.91, qtfys=36, qtbmrs=105, qtzql=0.34, yxfrs=66, sfyh=摇号, step=报名, hpbz=null, month=1)
             Integer yhbm_thisCq_djsize = v.size();
             yhbm_everyCq_djsize_Map.put(k, String.valueOf(yhbm_thisCq_djsize));
             Integer yhbm_thisCq_yhsize = v.stream().filter(x -> x.getBmrs() != null && x.getFys() != null).filter(x -> (x.getBmrs() - x.getFys()) > 0).collect(Collectors.toList()).size();
