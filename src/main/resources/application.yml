@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: management-yjzx
+    name: management-jsbsb
   profiles:
     active: dev
 
@@ -22,13 +22,7 @@ jwt:
   expiration: 604800 #JWT的超期限时间(60*60*24*7)
   tokenHead: 'Bearer '  #JWT负载中拿到开头
 
-redis:
-  database: reports
-  key:
-    admin: 'reports:ums:admin'
-    resourceList: 'reports:ums:resourceList'
-  expire:
-    common: 86400 # 24小时
+
 
 secure:
   ignored:
@@ -49,35 +43,3 @@ secure:
       - /admin/info
       - /admin/logout
       - /test/**
-
-hzfc:
-  zhibiao:
-    city: 福　　州,广　　州,合　　肥,厦　　门,武　　汉,长　　沙,重　　庆,北　　京,青　　岛,上　　海,南　　京,天　　津,深　　圳,济　　南,宁　　波,郑　　州,成　　都,无　　锡,杭　　州,沈　　阳,长　　春,苏　　州
-    hz: 杭　　州
-  cq:
-    zcq: 主城区
-    xs: 萧山区
-    yh: 余杭区
-    fy: 富阳区
-    la: 临安区
-  cqid:
-    dhz: 330000
-
-
-socketio:
-  host: localhost
-  port: 9099
-  # 设置最大每帧处理数据的长度，防止他人利用大数据来攻击服务器
-  maxFramePayloadLength: 1048576
-  # 设置http交互最大内容长度
-  maxHttpContentLength: 1048576
-  # socket连接数大小（如只监听一个端口boss线程组为1即可）
-  bossCount: 1
-  workCount: 100
-  allowCustomRequests: true
-  # 协议升级超时时间（毫秒），默认10秒。HTTP握手升级为ws协议超时时间
-  upgradeTimeout: 1000000
-  # Ping消息超时时间（毫秒），默认60秒，这个时间间隔内没有接收到心跳消息就会发送超时事件
-  pingTimeout: 6000000
-  # Ping消息间隔（毫秒），默认25秒。客户端向服务器发送一条心跳消息间隔
-  pingInterval: 25000

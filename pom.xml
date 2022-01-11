@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.management.yjzx</groupId>
-    <artifactId>hzfc-yjzx</artifactId>
+    <groupId>com.management.jsbsb</groupId>
+    <artifactId>hzfc-jsbsb</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>hzfc-yjzx</name>
-    <description>hzfc-yjzx project</description>
+    <name>hzfc-jsbsb</name>
+    <description>hzfc-jsbsb project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,10 +38,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -176,7 +176,6 @@
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc14</artifactId>
             <version>10.2.0.4.0</version>
-            <type>pom</type>
         </dependency>
 
         <dependency>
@@ -184,7 +183,11 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.75</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.11.3</version>
+        </dependency>
 
     </dependencies>
 
@@ -194,34 +197,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>${docker.maven.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>build-image</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <imageName>hzfc-yjzx/${project.artifactId}:${project.version}</imageName>
-                    <dockerHost>${docker.host}</dockerHost>
-                    <baseImage>java:8</baseImage>
-                    <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
-                    </entryPoint>
-                    <resources>
-                        <resource>
-                            <targetPath>/</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}.jar</include>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 

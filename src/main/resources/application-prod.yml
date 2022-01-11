@@ -10,11 +10,3 @@ logging:
   level:
     root: info
     com.hzfc.management: info
-
-hzfc:
-  uploadfile:
-    wordTemplate:
-      path: /usr/local/src/uploadfile/zdhbb/wordTemplate/
-  temporaryfile:
-    word:
-      path: /usr/local/src/uploadfile/zdhbb/file/word/
