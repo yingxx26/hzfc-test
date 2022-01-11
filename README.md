@@ -1,3 +1,5 @@
+访问：http://localhost:8080/aliPay/tradePreCreatePay
+
 注意：word显示图标数据，要设置图标区可选文字
      注意指标的显示格式
 # mall-tiny

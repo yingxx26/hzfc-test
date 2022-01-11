@@ -43,3 +43,4 @@ secure:
       - /admin/info
       - /admin/logout
       - /test/**
+      - /aliPay/**
