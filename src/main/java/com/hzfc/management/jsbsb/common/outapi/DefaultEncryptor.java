@@ -5,16 +5,22 @@ package com.hzfc.management.jsbsb.common.outapi;
  */
 
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author liuqun.lq
  * @version $Id: DefaultEncryptor.java, v 0.1 2018年07月03日 12:24 liuqun.lq Exp $
  */
 public class DefaultEncryptor implements Encryptor {
 
-    private String encryptKey;
+    public static final Map<String, String> encryptKey_MAP = new ConcurrentHashMap<String, String>();
+
+    private String encryptKey ;
 
     public DefaultEncryptor(String encryptKey) {
         this.encryptKey = encryptKey;
+        this.encryptKey =encryptKey_MAP.get("encryptKey");
     }
 
     public String encrypt(String sourceContent, String encryptType, String charset) {

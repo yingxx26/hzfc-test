@@ -1,4 +1,4 @@
-package com.hzfc.management.jsbsb.rsa2;
+package com.hzfc.management.jsbsb.encryption;
 
 /**
  * Created by lijinquan on 2019/3/28.
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** 生成RSA2的公钥和私钥方法 */
-class RSA2 {
+public class RSA2Util {
     public static final String KEY_ALGORITHM = "RSA";
     public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
     public static final String PUBLIC_KEY = "publicKey";

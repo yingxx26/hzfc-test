@@ -129,6 +129,7 @@ public class WebUtils {
                                 int connectTimeout, int readTimeout, String proxyHost,
                                 int proxyPort, Map<String, String> headers) throws IOException {
         String ctype = "application/x-www-form-urlencoded;charset=" + charset;
+        //String ctype = "application/json;charset=" + charset;
         String query = buildQuery(params, charset);
         byte[] content = {};
         if (query != null) {
@@ -312,7 +313,7 @@ public class WebUtils {
         conn.setRequestMethod(method);
         conn.setDoInput(true);
         conn.setDoOutput(true);
-        conn.setRequestProperty("Accept", "text/plain,text/xml,text/javascript,text/html");
+        conn.setRequestProperty("Accept", "text/plain,text/xml,text/javascript,text/html,application/json");
         conn.setRequestProperty("User-Agent", "aop-sdk-java");
         conn.setRequestProperty("Content-Type", ctype);
         if (headers != null) {

@@ -468,7 +468,7 @@ public class AlipaySignature {
         }
 
         params.remove("sign");
-        params.remove("sign_type");
+       //params.remove("sign_type");
 
         StringBuilder content = new StringBuilder();
         List<String> keys = new ArrayList<String>(params.keySet());

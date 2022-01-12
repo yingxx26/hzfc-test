@@ -1,11 +1,9 @@
-package com.hzfc.management.jsbsb.rsa2;
+package com.hzfc.management.jsbsb.encryption;
 
 
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
@@ -61,12 +59,12 @@ public class Rsatest {
         System.out.println("明文==>" + str1);
 
         // 公私钥对
-        Map<String, byte[]> keyMap = RSA2.generateKeyBytes();
-        String publicKey =  encode(keyMap.get(RSA2.PUBLIC_KEY));
+        Map<String, byte[]> keyMap = RSA2Util.generateKeyBytes();
+        String publicKey =  encode(keyMap.get(RSA2Util.PUBLIC_KEY));
 
         System.out.println("验签公钥==>" + publicKey);
 
-        String privateKey =  encode(keyMap.get(RSA2.PRIVATE_KEY));
+        String privateKey =  encode(keyMap.get(RSA2Util.PRIVATE_KEY));
 
         System.out.println("签名私钥==>" + privateKey);
 
@@ -98,11 +96,11 @@ public class Rsatest {
 
         try {
 
-            String enpublicKey =  encode(keyMap.get(RSA2.PUBLIC_KEY));
+            String enpublicKey =  encode(keyMap.get(RSA2Util.PUBLIC_KEY));
 
             System.out.println("加密公钥=" + enpublicKey);
 
-            String deprivateKey =  encode(keyMap.get(RSA2.PRIVATE_KEY));
+            String deprivateKey =  encode(keyMap.get(RSA2Util.PRIVATE_KEY));
             System.out.println("解密私钥=" + deprivateKey);
             //String encode = rsa2Util.encrypt(str1, enpublicKey);
 
@@ -177,7 +175,7 @@ public class Rsatest {
      */
     public static String encryptByPrivateKey(String content, String privateKey)
             throws Exception {
-        Key privateK = RSA2.restorePrivateKey( decode(privateKey));
+        Key privateK = RSA2Util.restorePrivateKey( decode(privateKey));
         Cipher cipher = Cipher.getInstance("RSA");/////
         cipher.init(Cipher.ENCRYPT_MODE, privateK);
         byte[] data = content.getBytes();
@@ -326,7 +324,7 @@ public class Rsatest {
      * @return
      */
     public String signStr(String privateKey, String plainText) {
-        return bytesToHexString(sign(RSA2.restorePrivateKey( decode(privateKey)), plainText));
+        return bytesToHexString(sign(RSA2Util.restorePrivateKey( decode(privateKey)), plainText));
     }
 
 
@@ -353,7 +351,7 @@ public class Rsatest {
      * @return
      */
     public boolean verifySignStr(String publicKey, String plainText, String signValue) {
-        return verifySign(RSA2.restorePublicKey( decode(publicKey)), plainText, hexStringToBytes(signValue));
+        return verifySign(RSA2Util.restorePublicKey( decode(publicKey)), plainText, hexStringToBytes(signValue));
     }
 
 

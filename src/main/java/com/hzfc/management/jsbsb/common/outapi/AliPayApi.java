@@ -285,6 +285,8 @@ public class AliPayApi {
 		AlipayTradePrecreateRequest request = new AlipayTradePrecreateRequest();
 		request.setBizModel(model);
 		request.setNotifyUrl(notifyUrl);
+		//设置加密
+		request.setNeedEncrypt(true);
 		return doExecute(request);
 	}
 

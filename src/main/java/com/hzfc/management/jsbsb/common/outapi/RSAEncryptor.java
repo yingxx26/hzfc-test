@@ -129,8 +129,8 @@ public class RSAEncryptor extends BaseAsymmetricEncryptor {
     protected boolean doVerify(String content, String charset, String publicKey, String sign) throws Exception {
         PublicKey pubKey = getPublicKeyFromX509("RSA",
                 new ByteArrayInputStream(publicKey.getBytes()));
-
-        Signature signature = Signature.getInstance(getSignAlgorithm());
+        String signAlgorithm = getSignAlgorithm();
+        Signature signature = Signature.getInstance("SHA256WithRSA");
 
         signature.initVerify(pubKey);
 

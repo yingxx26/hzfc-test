@@ -19,7 +19,7 @@ import javax.annotation.Resource;
  */
 @RequestMapping("/aliPay")
 @RestController
-public class ApiController  extends AbstractAliPayApiController{
+public class ApiController  {
 
     @Resource
     private AliPayBean aliPayBean;
@@ -48,6 +48,7 @@ public class ApiController  extends AbstractAliPayApiController{
         model.setStoreId(storeId);
         model.setTimeoutExpress("5m");
         model.setOutTradeNo("1");
+
         try {
             String resultStr = AliPayApi.tradePrecreatePayToResponse(model, notifyUrl).getBody();
             JSONObject jsonObject = JSONObject.parseObject(resultStr);
@@ -59,28 +60,4 @@ public class ApiController  extends AbstractAliPayApiController{
     }
 
 
-    @Override
-    public AliPayApiConfig getApiConfig() throws AlipayApiException {
-        AliPayApiConfig aliPayApiConfig;
-        try {
-            aliPayApiConfig = AliPayApiConfigKit.getApiConfig(aliPayBean.getAppId());
-        } catch (Exception e) {
-            aliPayApiConfig = AliPayApiConfig.builder()
-                    .setAppId(aliPayBean.getAppId())
-                    .setAliPayPublicKey(aliPayBean.getPublicKey())
-                    //.setAppCertPath(aliPayBean.getAppCertPath())
-                    //.setAliPayCertPath(aliPayBean.getAliPayCertPath())
-                    //.setAliPayRootCertPath(aliPayBean.getAliPayRootCertPath())
-                    .setCharset("UTF-8")
-                    .setPrivateKey(aliPayBean.getPrivateKey())
-                    .setServiceUrl(aliPayBean.getServerUrl())
-                    .setSignType("RSA2")
-                    // 普通公钥方式
-                     .build();
-                    // 证书模式
-                    //.buildByCert();
-
-        }
-        return aliPayApiConfig;
-    }
 }

@@ -137,7 +137,8 @@ public class DefaultAlipayClient extends AbstractAlipayClient {
     }
 
     public Encryptor getEncryptor() {
-        return encryptor;
+        return  this.encryptor = new DefaultEncryptor(encryptKey);
+      //  return encryptor;
     }
 
     public Decryptor getDecryptor() {
