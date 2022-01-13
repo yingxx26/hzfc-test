@@ -6,6 +6,8 @@ package com.hzfc.management.jsbsb.common.outapi;
 
 
 
+import com.hzfc.management.jsbsb.encryption.AESUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.util.StringUtils;
 
 import javax.net.ssl.SSLException;
@@ -528,8 +530,17 @@ public abstract class AbstractAlipayClient implements AlipayClient {
                 throw new AlipayApiException("API请求要求加密，则必须设置密钥类型和加密器");
             }
 
-            String encryptContent = getEncryptor().encrypt(
-                    appParams.get(AlipayConstants.BIZ_CONTENT_KEY), this.encryptType, this.charset);
+           /* String encryptContent = getEncryptor().encrypt(
+                    appParams.get(AlipayConstants.BIZ_CONTENT_KEY), this.encryptType, this.charset);*/
+
+            byte[] data = new byte[0];
+            try {
+                byte[] encryptKey = Base64.decodeBase64(DefaultEncryptor.encryptKey_MAP.get("encryptKeyBase64"));
+                data = AESUtils.encrypt( appParams.get(AlipayConstants.BIZ_CONTENT_KEY).getBytes(), encryptKey);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            String encryptContent =  Base64.encodeBase64String(data);
 
             appParams.put(AlipayConstants.BIZ_CONTENT_KEY, encryptContent);
         }

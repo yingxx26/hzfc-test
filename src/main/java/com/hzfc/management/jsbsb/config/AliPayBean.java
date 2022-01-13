@@ -29,8 +29,7 @@ public class AliPayBean {
     private String aliPayRootCertPath;
     private String serverUrl;
     private String domain;
-    private String aesKey;
-    public String getAppId() {
+     public String getAppId() {
         return appId;
     }
 
@@ -95,13 +94,6 @@ public class AliPayBean {
         this.domain = domain;
     }
 
-    public String getAesKey() {
-        return aesKey;
-    }
-
-    public void setAesKey(String aesKey) {
-        this.aesKey = aesKey;
-    }
 
     @Override
     public String toString() {

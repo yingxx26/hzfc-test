@@ -74,7 +74,7 @@ import javax.crypto.spec.SecretKeySpec;
             // 实例化密钥生成器
             KeyGenerator kg = KeyGenerator.getInstance(KEY_ALGORITHM);
             // 初始化密钥生成器，AES要求密钥长度为128位、192位、256位
-            kg.init(256);
+            kg.init(128);
             // 生成密钥
             SecretKey secretKey = kg.generateKey();
             // 获取二进制密钥编码形式

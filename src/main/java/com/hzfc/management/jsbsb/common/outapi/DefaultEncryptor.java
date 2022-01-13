@@ -20,7 +20,7 @@ public class DefaultEncryptor implements Encryptor {
 
     public DefaultEncryptor(String encryptKey) {
         this.encryptKey = encryptKey;
-        this.encryptKey =encryptKey_MAP.get("encryptKey");
+        this.encryptKey =encryptKey_MAP.get("encryptKeyBase64");
     }
 
     public String encrypt(String sourceContent, String encryptType, String charset) {

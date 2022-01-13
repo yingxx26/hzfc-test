@@ -19,7 +19,7 @@ public class DefaultDecryptor implements Decryptor {
 
     public DefaultDecryptor(String encryptKey) {
         this.encryptKey = encryptKey;
-        this.encryptKey =encryptKey_MAP.get("encryptKey");
+        this.encryptKey =encryptKey_MAP.get("encryptKeyBase64");
     }
 
     public String decrypt(String encryptContent, String encryptType, String charset) {

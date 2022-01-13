@@ -7,6 +7,7 @@ import com.hzfc.management.jsbsb.common.exception.ApiException;
 import com.hzfc.management.jsbsb.common.outapi.*;
 import com.hzfc.management.jsbsb.config.AliPayBean;
 import com.hzfc.management.jsbsb.encryption.AESUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -49,8 +50,9 @@ public class TestController {
         boolean signVerified = AlipaySignature.rsaCheckV1(params, aliPayBean.getPublicKey(),
                 "UTF-8", "RSA");
 
-
-        byte[] plainBytes = AESUtils.decrypt(params.get("biz_content").getBytes(), aliPayBean.getAesKey().getBytes());
+        byte[] encryptKey = Base64.decodeBase64(DefaultEncryptor.encryptKey_MAP.get("encryptKeyBase64"));
+        byte[] biz_contents = Base64.decodeBase64(params.get("biz_content").getBytes());
+        byte[] plainBytes = AESUtils.decrypt(biz_contents,  encryptKey );
         String x = new String(plainBytes, "UTF-8");
 
         Map outermap = new HashMap();

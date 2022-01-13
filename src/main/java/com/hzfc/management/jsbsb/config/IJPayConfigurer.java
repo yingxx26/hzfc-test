@@ -4,8 +4,10 @@ package com.hzfc.management.jsbsb.config;
 import com.hzfc.management.jsbsb.common.outapi.AliPayApiConfigKit;
  import com.hzfc.management.jsbsb.common.outapi.DefaultDecryptor;
  import com.hzfc.management.jsbsb.common.outapi.DefaultEncryptor;
+ import com.hzfc.management.jsbsb.encryption.AESUtils;
  import com.hzfc.management.jsbsb.modules.api.controller.AbstractAliPayApiController;
-import org.springframework.context.annotation.Bean;
+ import org.apache.commons.codec.binary.Base64;
+ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -26,7 +28,7 @@ public class IJPayConfigurer extends WebMvcConfigurationSupport {
     private AliPayBean aliPayBean;
 
     @Bean
-    public void  getConfig() {
+    public void  getConfig() throws Exception {
         AliPayApiConfig aliPayApiConfig;
         try {
             aliPayApiConfig = AliPayApiConfigKit.getApiConfig(aliPayBean.getAppId());
@@ -48,8 +50,11 @@ public class IJPayConfigurer extends WebMvcConfigurationSupport {
 
         }
         AliPayApiConfigKit.setThreadLocalAliPayApiConfig(aliPayApiConfig);
-        DefaultEncryptor.encryptKey_MAP.put("encryptKey",aliPayBean.getAesKey());
-        DefaultDecryptor.encryptKey_MAP.put("encryptKey",aliPayBean.getAesKey());
+
+        String encryptKeyBase64 = Base64.encodeBase64String(AESUtils.initkey());
+
+        DefaultEncryptor.encryptKey_MAP.put("encryptKeyBase64",encryptKeyBase64);
+        DefaultDecryptor.encryptKey_MAP.put("encryptKeyBase64",encryptKeyBase64);
 
     }
 
