@@ -24,12 +24,6 @@ public class ApiController  {
     @Resource
     private AliPayBean aliPayBean;
 
-    @RequestMapping(value = "/mytest", method = RequestMethod.GET)
-    @ResponseBody
-    public CommonResult<String> getewm() {
-
-        return CommonResult.success(null);
-    }
     /**
      * 扫码支付
      */

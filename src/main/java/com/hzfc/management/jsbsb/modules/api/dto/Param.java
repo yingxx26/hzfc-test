@@ -1,11 +1,7 @@
-package com.hzfc.management.jsbsb.modules.test.controller;
+package com.hzfc.management.jsbsb.modules.api.dto;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 
 /**
  * 用户登录参数
