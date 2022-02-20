@@ -200,6 +200,11 @@
             <artifactId>alipay-sdk-java</artifactId>
             <version>4.22.17.ALL</version>
         </dependency>-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>23.0</version>
+        </dependency>
 
     </dependencies>
 
