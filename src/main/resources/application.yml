@@ -45,3 +45,4 @@ secure:
       - /test/**
       - /aliPay/**
       - /aliPayServer/**
+      - /testShiwu/**
