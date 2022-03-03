@@ -5,13 +5,10 @@ import com.hzfc.management.jsbsb.common.outapi.AliPayApiConfigKit;
  import com.hzfc.management.jsbsb.common.outapi.DefaultDecryptor;
  import com.hzfc.management.jsbsb.common.outapi.DefaultEncryptor;
  import com.hzfc.management.jsbsb.encryption.AESUtils;
- import com.hzfc.management.jsbsb.modules.api.controller.AbstractAliPayApiController;
  import org.apache.commons.codec.binary.Base64;
  import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import javax.annotation.Resource;
 

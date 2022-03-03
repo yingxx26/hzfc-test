@@ -1,11 +1,11 @@
-package com.hzfc.management.jsbsb.modules.api.controller;
+package com.hzfc.management.jsbsb.modules.testZfb.controller;
 
 import com.hzfc.management.jsbsb.common.api.CommonResult;
 import com.hzfc.management.jsbsb.common.outapi.AlipaySignature;
 import com.hzfc.management.jsbsb.common.outapi.DefaultEncryptor;
 import com.hzfc.management.jsbsb.config.AliPayBean;
 import com.hzfc.management.jsbsb.encryption.AESUtils;
-import com.hzfc.management.jsbsb.modules.api.dto.Param;
+import com.hzfc.management.jsbsb.modules.testZfb.dto.Param;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

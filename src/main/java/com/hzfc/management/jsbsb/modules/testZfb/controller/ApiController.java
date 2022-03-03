@@ -1,12 +1,10 @@
-package com.hzfc.management.jsbsb.modules.api.controller;
+package com.hzfc.management.jsbsb.modules.testZfb.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.hzfc.management.jsbsb.common.api.CommonResult;
 import com.hzfc.management.jsbsb.common.outapi.*;
 import com.hzfc.management.jsbsb.config.AliPayBean;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 

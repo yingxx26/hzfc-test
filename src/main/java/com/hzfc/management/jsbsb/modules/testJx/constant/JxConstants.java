@@ -1,4 +1,4 @@
-package com.hzfc.management.jsbsb.modules.test.constant;
+package com.hzfc.management.jsbsb.modules.testJx.constant;
 
 
 import java.math.BigDecimal;

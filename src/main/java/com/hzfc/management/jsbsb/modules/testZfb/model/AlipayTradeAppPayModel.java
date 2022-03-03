@@ -1,12 +1,9 @@
-package com.hzfc.management.jsbsb.modules.api.model;
+package com.hzfc.management.jsbsb.modules.testZfb.model;
 
 
 
 import com.hzfc.management.jsbsb.common.outapi.AlipayObject;
 import com.hzfc.management.jsbsb.common.outapi.ApiField;
-
-import java.util.List;
-
 
 
 /**

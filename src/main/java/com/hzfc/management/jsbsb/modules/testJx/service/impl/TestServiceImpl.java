@@ -1,13 +1,13 @@
-package com.hzfc.management.jsbsb.modules.test.service.impl;
+package com.hzfc.management.jsbsb.modules.testJx.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.hzfc.management.jsbsb.modules.test.constant.JxConstants;
-import com.hzfc.management.jsbsb.modules.test.dto.TprDqjxgs;
-import com.hzfc.management.jsbsb.modules.test.dto.TprHqjxgs;
-import com.hzfc.management.jsbsb.modules.test.dto.TprJxjg;
-import com.hzfc.management.jsbsb.modules.test.dto.TprJxzhzjbd;
-import com.hzfc.management.jsbsb.modules.test.service.TestService;
+import com.hzfc.management.jsbsb.modules.testJx.constant.JxConstants;
+import com.hzfc.management.jsbsb.modules.testJx.dto.TprDqjxgs;
+import com.hzfc.management.jsbsb.modules.testJx.dto.TprHqjxgs;
+import com.hzfc.management.jsbsb.modules.testJx.dto.TprJxjg;
+import com.hzfc.management.jsbsb.modules.testJx.dto.TprJxzhzjbd;
+import com.hzfc.management.jsbsb.modules.testJx.service.TestService;
 import com.hzfc.management.jsbsb.utils.dateUtils.DateUtil;
 import org.springframework.stereotype.Service;
 

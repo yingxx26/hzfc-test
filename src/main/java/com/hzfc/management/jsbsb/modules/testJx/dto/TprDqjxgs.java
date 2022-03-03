@@ -1,4 +1,4 @@
-package com.hzfc.management.jsbsb.modules.test.dto;
+package com.hzfc.management.jsbsb.modules.testJx.dto;
 
 
 import java.math.BigDecimal;

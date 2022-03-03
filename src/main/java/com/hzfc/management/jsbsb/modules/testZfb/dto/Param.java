@@ -1,4 +1,4 @@
-package com.hzfc.management.jsbsb.modules.api.dto;
+package com.hzfc.management.jsbsb.modules.testZfb.dto;
 
 import lombok.Getter;
 import lombok.Setter;
