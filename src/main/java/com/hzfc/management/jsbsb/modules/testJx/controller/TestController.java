@@ -14,7 +14,7 @@ import java.util.*;
  *
  * @author Administrator
  */
-@RequestMapping("/test")
+@RequestMapping("/testjx")
 @RestController
 public class TestController {
 
