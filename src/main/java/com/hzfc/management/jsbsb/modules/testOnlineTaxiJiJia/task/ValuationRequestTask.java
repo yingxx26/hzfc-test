@@ -34,8 +34,6 @@ public class ValuationRequestTask {
     @NonNull
     private RuleCache ruleCache;
 
-    @NonNull
-    private RestTemplate restTemplate;
 
    /* @NonNull
     private ServiceAddress serviceAddress;*/

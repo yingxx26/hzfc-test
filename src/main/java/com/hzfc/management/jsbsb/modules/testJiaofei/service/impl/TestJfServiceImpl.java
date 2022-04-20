@@ -111,14 +111,14 @@ public class TestJfServiceImpl implements TestJfService {
             Date billEndTime = DateUtil2.getCurrentDate();
             String formatbillEndTime = DateUtil.format(billEndTime, "yyyy-MM-dd");
             System.out.println("当前时间billEndTime" + formatbillEndTime);
-            //建账时间
+            //建账时间 首次计费时间
             Date startDate = feeDto.getStartTime();
             String formattargetstartDate = DateUtil.format(startDate, "yyyy-MM-dd");
-            System.out.println("费用开始时间startDate" + formattargetstartDate);
-            //计费起始时间
+            System.out.println("首次计费时间startDate" + formattargetstartDate);
+            //计费开始时间
             Date endDate = feeDto.getEndTime();
             String formattargetendDate = DateUtil.format(endDate, "yyyy-MM-dd");
-            System.out.println("费用结束时间endDate" + formattargetendDate);
+            System.out.println("费用开始时间endDate" + formattargetendDate);
 
             //缴费周期
             long paymentCycle = Long.parseLong(feeDto.getPaymentCycle());
@@ -137,7 +137,7 @@ public class TestJfServiceImpl implements TestJfService {
             // 轮数 * 周期 * 30 + 开始时间 = 目标 到期时间
             targetEndDate = getTargetEndTime(round * paymentCycle, startDate);//目标结束时间
             String formattargetEndDate = DateUtil.format(targetEndDate, "yyyy-MM-dd");
-            System.out.println("费用结束时间targetEndDate" + formattargetEndDate);
+            System.out.println("费用到期时间targetEndDate" + formattargetEndDate);
             //费用项的结束时间<缴费的结束时间  费用快结束了   取费用项的结束时间
             if (feeDto.getConfigEndTime().getTime() < targetEndDate.getTime()) {
                 targetEndDate = feeDto.getConfigEndTime();
@@ -218,15 +218,17 @@ public class TestJfServiceImpl implements TestJfService {
         newFrom.add(Calendar.MONTH, result);
         //如果加月份后 大于了当前时间 默认加 月份 -1 情况 12-19  21-01-10
         //这个是神的逻辑一定好好理解
-        if (newFrom.getTime().getTime() > toDate.getTime()) {
+        Date newFromtime = newFrom.getTime();
+        Date toTime = to.getTime();
+        if (newFromtime.getTime() > toDate.getTime()) {
             newFrom.setTime(fromDate);
             result = result - 1;
             newFrom.add(Calendar.MONTH, result);
         }
-
+        Date newFromtime2 = newFrom.getTime();
         // t1 2021-08-01   t2 2021-08-05
-        long t1 = newFrom.getTime().getTime();
-        long t2 = to.getTime().getTime();
+        long t1 = newFromtime2.getTime();
+        long t2 = toTime.getTime();
         //相差毫秒
         double days = (t2 - t1) * 1.00 / (24 * 60 * 60 * 1000);
         BigDecimal tmpDays = new BigDecimal(days); //相差天数
@@ -234,8 +236,9 @@ public class TestJfServiceImpl implements TestJfService {
         Calendar newFromMaxDay = Calendar.getInstance();
         newFromMaxDay.set(newFrom.get(Calendar.YEAR), newFrom.get(Calendar.MONTH), 1, 0, 0, 0);
         newFromMaxDay.add(Calendar.MONTH, 1); //下个月1号
+        Date newFromMaxDaytime = newFromMaxDay.getTime();
         //在当前月中 这块有问题
-        if (toDate.getTime() < newFromMaxDay.getTime().getTime()) {
+        if (toDate.getTime() < newFromMaxDaytime.getTime()) {
             monthDay = new BigDecimal(newFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
             return tmpDays.divide(monthDay, 2, BigDecimal.ROUND_HALF_UP).add(new BigDecimal(result)).doubleValue();
         }

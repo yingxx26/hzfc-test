@@ -19,9 +19,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
+
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -85,37 +89,34 @@ public class HzfcApplicationTests {
 
 
     @Test
-    public void testJf() throws IOException {
+    public void testdate() throws IOException {
 
-        FeeDto feeDto = new FeeDto();
-
-        feeDto.setPaymentCycle("1");
-        feeDto.setPaymentCd("1200");  // 1200预付费
-        feeDto.setSquarePrice("20");
-        feeDto.setComputingFormula("1001");
         LocalDate thisDay = LocalDate.now();
         LocalDate thismonthfirstDay = thisDay.with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate startdate = thismonthfirstDay.minusMonths(3);
-        LocalDate enddate = thismonthfirstDay.minusMonths(1);
-        LocalDate configEndTime = thismonthfirstDay.plusMonths(3);
-        String formatstartdate = DateUtil.format(DateUtil.localDate2Date(startdate), "yyyy-MM-dd");
-        String formatenddate = DateUtil.format(DateUtil.localDate2Date(enddate), "yyyy-MM-dd");
-        System.out.println("计费开始时间" + formatstartdate);
-        System.out.println("计费结束时间" + formatenddate);
-        String formatconfigEndTime = DateUtil.format(DateUtil.localDate2Date(configEndTime), "yyyy-MM-dd");
-        System.out.println("费用项结束时间" + formatenddate);
-        Date lastmonthDate = DateUtil.localDate2Date(startdate);
-        Date nextmonthDate = DateUtil.localDate2Date(enddate);
-        Date configEndTimeDate = DateUtil.localDate2Date(configEndTime);
-        feeDto.setStartTime(lastmonthDate);
-        feeDto.setConfigEndTime(configEndTimeDate);
-        feeDto.setEndTime(nextmonthDate);
-        feeDto.setAdditionalAmount("10");
-        feeDto.setPayerObjType(FeeDto.PAYER_OBJ_TYPE_ROOM);
-        RoomDto roomDto = new RoomDto();
-        roomDto.setBuiltUpArea("100");
+        LocalDate localDate = thismonthfirstDay.minusDays(5); // 2022/3/27
+        LocalDate startdate = localDate.minusMonths(2);// 2022/1/27
+        LocalDate enddate = thisDay;// 2022/4/20
+        long absm = Math.abs(ChronoUnit.MONTHS.between(startdate, enddate));
+        BigDecimal absmDecimal = new BigDecimal(absm);
 
-        testJfService.computeFeePrice(feeDto, roomDto);
-        System.out.println();
+        int startAlldays = startdate.lengthOfMonth();//31
+        LocalDate startdatelastDay = startdate.with(TemporalAdjusters.lastDayOfMonth());// 2022/1/31
+        long abs = Math.abs(ChronoUnit.DAYS.between(startdate, startdatelastDay));
+        BigDecimal absDecimal = new BigDecimal(abs);
+        BigDecimal startAlldaysDecimal = new BigDecimal(startAlldays);
+        BigDecimal start = absDecimal.divide(startAlldaysDecimal, 2, BigDecimal.ROUND_HALF_UP);
+
+        int endAlldays = enddate.lengthOfMonth();//31
+        LocalDate enddatefirstDay = enddate.with(TemporalAdjusters.firstDayOfMonth());// 2022/4/1
+        long abs2 = Math.abs(ChronoUnit.DAYS.between(enddatefirstDay, enddate));
+        BigDecimal abs2Decimal = new BigDecimal(abs2);
+        BigDecimal endAlldaysDecimal = new BigDecimal(endAlldays);
+        BigDecimal end = abs2Decimal.divide(endAlldaysDecimal, 2, BigDecimal.ROUND_HALF_UP);
+
+
+        BigDecimal res = absmDecimal.add(start).add(end);
+        System.out.println(res);
     }
+
+
 }
