@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 后台管理员管理Service实现类
@@ -65,11 +66,12 @@ public class TestServiceImpl implements TestService {
             wxjZjlistMap.put(i + "", tprJxzhzjbdList);
         }
 
+        List<ZhThjxDto> zhThjxDtoList = Lists.newArrayListWithExpectedSize(1000);
 
-        List<TprDqjxgs> dqgslist = new ArrayList();
-        List<TprHqjxgs> hqgslist = new ArrayList();
+
         for (Map.Entry<String, List<TprJxzhzjbd>> entry : wxjZjlistMap.entrySet()) {
-
+            List<TprDqjxgs> dqgslist = new ArrayList();
+            List<TprHqjxgs> hqgslist = new ArrayList();
             //维修金 重要逻辑
             String zhcode = entry.getKey(); //获取zhcode
             List<TprJxzhzjbd> tprJxzhzjbdList = wxjZjlistMap.get(zhcode);
@@ -100,11 +102,14 @@ public class TestServiceImpl implements TestService {
             TprZhjxmx tprZhjxmx = grjxFormHqDq(999999, "2022", lastDayOfYearDate, DayOfYearDate, DateUtil.localDate2Date(thisDay), zhcode.toString(), hqlv, dqlv, hqgslist, dqgs);
 
             ZhThjxDto zhThjxDto = new ZhThjxDto();
-            zhThjxDto.setZhcode(new Long(zhcode));
+            zhThjxDto.setZhcode(zhcode);
             zhThjxDto.setBnlx(tprZhjxmx.getZhlx());
-           // zhThjxDto.setZlx(zhThjxDto.getBnlx().add(zhThjxDto.getSnlx()));
+            // zhThjxDto.setZlx(zhThjxDto.getBnlx().add(zhThjxDto.getSnlx()));
+            zhThjxDtoList.add(zhThjxDto);
 
         }
+       // List<ZhThjxDto> collect = zhThjxDtoList.stream().sorted((a, b) -> a.getZhcode().compareTo(b.getZhcode())).collect(Collectors.toList());
+        System.out.println();
         //		代码运行结束时间
         Long endTime = System.currentTimeMillis();
 //		计算并打印耗时

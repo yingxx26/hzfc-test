@@ -2,6 +2,7 @@ package com.hzfc.management.jsbsb.utils.MyListUtil;
 
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,11 @@ public class MyListUtil {
      * @return list集合分割后的集合
      */
     public static <T> List<List<T>> splitList(List<T> list, int splitSize) {
+        if (splitSize <= 0) {
+            ArrayList<List<T>> objects = new ArrayList<>();
+            objects.add(list);
+            return objects;
+        }
         //判断集合是否为空
         if (CollectionUtils.isEmpty(list)) {
             return Collections.emptyList();
