@@ -11,6 +11,7 @@ import java.util.Date;
  * Time: 下午3:28
  * To change this template use File | Settings | File Templates.
  */
+//结息结果
 public class TprJxjg    {
 
     private Date jxr; // 结息日

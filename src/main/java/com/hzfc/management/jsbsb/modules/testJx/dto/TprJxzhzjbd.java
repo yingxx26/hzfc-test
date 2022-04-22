@@ -7,6 +7,7 @@ import java.util.Date;
  * @Author yxx
  * @Date 2022/2/20 12:26
  */
+//结息账号资金变动
 public class TprJxzhzjbd {
 
     private String zhcode;
