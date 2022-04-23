@@ -123,9 +123,10 @@ public class TestDuoxcServiceImpl implements TestDuoxcService {
         // CountDownLatch作为递减计数器，一个线程完成了一个任务，计数器减一，减为0时表示任务全部完成
         CountDownLatch downLatch = new CountDownLatch(taskCount);
 
-        ExecutorService executorService = new ThreadPoolExecutor
+       /* ExecutorService executorService = new ThreadPoolExecutor
                 (taskCount, 30, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
-
+*/
+        ExecutorService executorService = Executors.newCachedThreadPool();
         for (int i = 0; i < taskCount; i++) {
             // 开启三个异步任务
             Future<List<ZhThjxDto>> future = executorService.submit(testFuture.executeTask(i, downLatch, tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, lists.get(i)));
@@ -181,7 +182,7 @@ public class TestDuoxcServiceImpl implements TestDuoxcService {
             //维修金 重要逻辑
             List<TprJxzhzjbd> tprJxzhzjbdList = wxjZjlistList.get(i);
             String zhcode = tprJxzhzjbdList.get(0).getZhcode(); //获取zhcode
-             if (tprJxzhzjbdList == null) {
+            if (tprJxzhzjbdList == null) {
                 tprJxzhzjbdList = new ArrayList<TprJxzhzjbd>();
             }
             //tprJxjg结息结果

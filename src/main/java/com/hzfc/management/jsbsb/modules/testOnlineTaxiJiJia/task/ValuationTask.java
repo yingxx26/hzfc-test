@@ -99,8 +99,10 @@ public class ValuationTask {
             unit.setEnd(UnitConverter.dateToLocalTime(rulePrice.getNightEnd()));
             unit.setPerMeterPrice(UnitConverter.kiloToMeterPrice(rulePrice.getNightPerKiloPrice()));
             unit.setPerSecondPrice(UnitConverter.minuteToSecondPrice(rulePrice.getNightPerMinutePrice()));
-            //
-            TimeMeter.TimePriceResult result = TimeMeter.measure(generateTimeSlice(driveMeter), unit);
+            // //实际预测的行驶开始到结束的时间片
+            TimeSlice totalNightSlice = generateTimeSlice(driveMeter);
+            //利用totalNightSlice, unit获取计算结果  关键代码
+            TimeMeter.TimePriceResult result = TimeMeter.measure(totalNightSlice, unit);
             rulePrice.setNightTime(UnitConverter.secondToMinute(result.getDuration()));
             rulePrice.setNightDistance(UnitConverter.meterToKilo(result.getDistance()));
             rulePrice.setNightPrice(PriceHelper.add(result.getDistancePrice(), result.getTimePrice()));
@@ -123,7 +125,7 @@ public class ValuationTask {
      */
     @Async
     public CompletableFuture<List<OrderRulePriceDetail>> calcDetailPrice(DriveMeter driveMeter) {
-        //行驶开始到结束的时间片
+        //实际预测的行驶开始到结束的时间片
         TimeSlice totalSlice = generateTimeSlice(driveMeter);
 
         //根据时间段计算价格
@@ -137,14 +139,14 @@ public class ValuationTask {
             detail.setPerKiloPrice(r.getPerKiloPrice());
             detail.setPerMinutePrice(r.getPerMinutePrice());
 
-            //设置计算用参数
+            //设置计算用参数（距离除以时间-》速度）
             TimeMeter.TimePriceUnit unit = generateTimePriceUnit(driveMeter);
             unit.setStart(LocalTime.of(detail.getStartHour(), 0, 0));
             unit.setEnd(LocalTime.of(detail.getEndHour(), 0, 0).minusSeconds(1));
             unit.setPerMeterPrice(UnitConverter.kiloToMeterPrice(detail.getPerKiloPrice()));
             unit.setPerSecondPrice(UnitConverter.minuteToSecondPrice(detail.getPerMinutePrice()));
 
-            //获取计算结果
+            //利用totalSlice, unit获取计算结果  关键代码
             TimeMeter.TimePriceResult result = TimeMeter.measure(totalSlice, unit);
             detail.setDuration(UnitConverter.secondToMinute(result.getDuration()));
             detail.setTimePrice(PriceHelper.resetScale(result.getTimePrice()));

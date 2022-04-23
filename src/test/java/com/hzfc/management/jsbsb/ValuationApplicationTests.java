@@ -70,14 +70,14 @@ public class ValuationApplicationTests {
 
 
         BeyondRule  beyondRule =new BeyondRule();
-        beyondRule.setStartKilo(20D);
+        beyondRule.setStartKilo(1D);
         beyondRule.setPerKiloPrice(new BigDecimal("5"));
         rule.setBeyondRule(beyondRule);
 
 
         NightRule nightRule=new NightRule();
-        nightRule.setStart(strToDate2("02:00:00"));
-        nightRule.setEnd(strToDate2("03:00:00"));
+        nightRule.setStart(strToDate2("00:00:00"));
+        nightRule.setEnd(strToDate2("01:00:00"));
         nightRule.setPerKiloPrice(new BigDecimal("1"));
         nightRule.setPerMinutePrice(new BigDecimal("1"));
         rule.setNightRule(nightRule);
@@ -86,18 +86,21 @@ public class ValuationApplicationTests {
 
         Order order=new Order();
         order.setStartTime(strToDate("2021-12-28 23:20:00"));
+        //起始时间用的是下面这个
         order.setOrderStartTime(strToDate("2021-12-28 23:21:00"));
         order.setDriverStartTime(strToDate("2021-12-28 23:22:00"));
         order.setDriverArrivedTime(strToDate("2021-12-28 23:23:00"));
         order.setReceivePassengerTime(strToDate("2021-12-28 23:24:00"));
         order.setDriverGrabTime(strToDate("2021-12-28 23:25:00"));
         order.setPickUpPassengerTime(strToDate("2021-12-28 23:26:00"));
-        order.setPassengerGetoffTime(strToDate("2021-12-28 23:27:00"));
+        order.setPassengerGetoffTime(strToDate("2021-12-29 04:15:00"));
         driveMeter.setOrder(order);
 
 
         Route route =new Route();
+        //距离用的是下面这个
         route.setDistance(2000D);
+        //终止时间用的是下面这个
         route.setDuration(4000D);
         driveMeter.setRoute(route);
 

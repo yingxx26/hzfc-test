@@ -173,17 +173,18 @@ public class TimeMeter {
         for (int i = 0; i < totalDays; i++) {
             //获取要比较的两个时间段
             LocalDate startDate = totalSlice.getX().toLocalDate().plusDays(i);
+           //找到打车当天的totalSlice 相应时间段unit
             TimeSlice currentSlice = new TimeSlice(LocalDateTime.of(startDate, unit.getStart()), LocalDateTime.of(startDate, unit.getEnd()));
 
             //夜间跨天
             if (unit.getEnd().isBefore(unit.getStart())) {
                 currentSlice.setY(currentSlice.getY().plusDays(1));
 
-                currentSlice.setX(currentSlice.getX().minusDays(1));
-                currentSlice.setY(currentSlice.getY().minusDays(1));
+                /*currentSlice.setX(currentSlice.getX().minusDays(1));
+                currentSlice.setY(currentSlice.getY().minusDays(1));*/
             }
 
-            //计算该时间段内的时长
+            //根据实际时间段totalSlice和规则当天时间段currentSlice 计算该时间段内的时长
             double durationSeconds = totalSlice.until(currentSlice).getSeconds();
             result.setDuration(result.getDuration() + durationSeconds);
 
