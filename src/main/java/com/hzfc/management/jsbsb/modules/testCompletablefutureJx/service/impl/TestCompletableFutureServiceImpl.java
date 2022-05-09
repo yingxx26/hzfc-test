@@ -1,7 +1,8 @@
-package com.hzfc.management.jsbsb.modules.testDuoxianchenJx.service.impl;
+package com.hzfc.management.jsbsb.modules.testCompletablefutureJx.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.hzfc.management.jsbsb.modules.testCompletablefutureJx.service.TestCompletableFutureService;
 import com.hzfc.management.jsbsb.modules.testDuoxianchenJx.constant.JxConstants;
 import com.hzfc.management.jsbsb.modules.testDuoxianchenJx.dto.*;
 import com.hzfc.management.jsbsb.modules.testDuoxianchenJx.service.TestDuoxcService;
@@ -23,7 +24,7 @@ import java.util.concurrent.*;
  * Created by hzfc on 2018/4/26.
  */
 @Service
-public class TestDuoxcServiceImpl implements TestDuoxcService {
+public class TestCompletableFutureServiceImpl implements TestCompletableFutureService {
 
     @Override
     public void test() {
@@ -89,86 +90,42 @@ public class TestDuoxcServiceImpl implements TestDuoxcService {
 
     }
 
-   /* public void m1(TprJxjg tprJxjg, LocalDate thisDay, LocalDate lastlastDayOfYear, Date lastDayOfYearDate, Date dayOfYearDate, List<List<List<TprJxzhzjbd>>> lists) {
-        ExecutorService pool = Executors.newCachedThreadPool();
-        CountDownLatch latch = new CountDownLatch(lists.size());
-        for (List<List<TprJxzhzjbd>> splitwxjZjlistList : lists) {
-            Runnable run = new Runnable() {
-                public void run() {
-                    try {
-                        mainFunction(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, splitwxjZjlistList);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        latch.countDown();
-                    }
-                }
-            };
-            pool.execute(run);
-        }
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("[1] done!");
-        pool.shutdown();
-    }*/
 
     public void m2(TprJxjg tprJxjg, LocalDate thisDay, LocalDate lastlastDayOfYear, Date lastDayOfYearDate, Date dayOfYearDate, List<List<List<TprJxzhzjbd>>> lists) {
-        TestFuture testFuture = new TestFuture();
+
         // 初始为三个任务数
         int taskCount = lists.size();
         List<Future<List<ZhThjxDto>>> futures = new ArrayList<>(taskCount);
         // CountDownLatch作为递减计数器，一个线程完成了一个任务，计数器减一，减为0时表示任务全部完成
         CountDownLatch downLatch = new CountDownLatch(taskCount);
 
-       /* ExecutorService executorService = new ThreadPoolExecutor
-                (taskCount, 30, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
-*/
+        List<ZhThjxDto> result = new ArrayList<>(3);
+
         ExecutorService executorService = Executors.newCachedThreadPool();
+
         for (int i = 0; i < taskCount; i++) {
-            // 开启三个异步任务
-            Future<List<ZhThjxDto>> future = executorService.submit(testFuture.executeTask(i, downLatch, tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, lists.get(i)));
-            futures.add(future);
+            int finalI = i;
+            CompletableFuture.supplyAsync(() -> {
+                List<ZhThjxDto> zhThjxDtos = mainFunction(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, lists.get(finalI));
+                return zhThjxDtos;
+            }, executorService).whenComplete((r, t) -> {
+                result.addAll(r);
+                downLatch.countDown();
+                //System.out.println("结果" + finalI);
+            });
+
         }
 
         System.out.println("do other things");
 
         try {
+
             // 在downLatch不为0时，主线程会在此阻塞
             downLatch.await();
-            executorService.shutdown();
-            // 通过future获取结果
-            List<ZhThjxDto> result = testFuture.getFutureResult(futures);
-            System.out.println(result.size());
+            // System.out.println(result);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    class TestFuture {
-
-        public Callable<List<ZhThjxDto>> executeTask(int i, CountDownLatch downLatch, TprJxjg tprJxjg, LocalDate thisDay, LocalDate lastlastDayOfYear, Date lastDayOfYearDate, Date dayOfYearDate, List<List<TprJxzhzjbd>> splitwxjZjlistList) {
-            return () -> {
-                List<ZhThjxDto> zhThjxDtos = mainFunction(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, splitwxjZjlistList);
-                downLatch.countDown();
-                return zhThjxDtos;
-            };
-        }
-
-        public List<ZhThjxDto> getFutureResult(List<Future<List<ZhThjxDto>>> futures) {
-            List<ZhThjxDto> result = new ArrayList<>(3);
-            for (Future<List<ZhThjxDto>> future : futures) {
-                if (future.isDone() && !future.isCancelled()) {
-                    try {
-                        result.addAll(future.get());
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return result;
         }
     }
 
