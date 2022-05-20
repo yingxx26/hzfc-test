@@ -24,6 +24,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.bouncycastle.asn1.x500.style.RFC4519Style.l;
 
@@ -119,4 +121,54 @@ public class HzfcApplicationTests {
     }
 
 
+    @Test
+    public void testLock() throws IOException {
+
+        ReentrantLock lock = new ReentrantLock(true);
+        lock.lock();
+        lock.lock();
+
+        System.out.println("11");
+
+        lock.unlock();
+
+        lock.unlock();
+
+    }
+
+    @Test
+    public void testSemaphore() throws IOException, InterruptedException {
+
+        Semaphore semaphore = new Semaphore(2);
+        semaphore.acquire();
+
+        System.out.println("11");
+        semaphore.release();
+
+    }
+
+    @Test
+    public void testCountDown() throws IOException, InterruptedException, BrokenBarrierException {
+
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        System.out.println("11");
+        countDownLatch.countDown();
+        countDownLatch.countDown();
+        countDownLatch.await();
+
+
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
+        cyclicBarrier.await();
+    }
+
+    @Test
+    public void testBlockingqueue() throws IOException, InterruptedException, BrokenBarrierException {
+
+        BlockingQueue testBlockingqueue = new ArrayBlockingQueue(2);
+        testBlockingqueue.put("a");
+        testBlockingqueue.put("b");
+        testBlockingqueue.put("c");
+        testBlockingqueue.put("d");
+        testBlockingqueue.take();
+    }
 }

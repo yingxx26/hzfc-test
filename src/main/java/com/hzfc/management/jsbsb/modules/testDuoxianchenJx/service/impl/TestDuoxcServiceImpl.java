@@ -123,9 +123,9 @@ public class TestDuoxcServiceImpl implements TestDuoxcService {
         // CountDownLatch作为递减计数器，一个线程完成了一个任务，计数器减一，减为0时表示任务全部完成
         CountDownLatch downLatch = new CountDownLatch(taskCount);
 
-       /* ExecutorService executorService = new ThreadPoolExecutor
+        /*ExecutorService executorServiceyxx = new ThreadPoolExecutor
                 (taskCount, 30, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
-*/
+        executorServiceyxx.execute();*/
         ExecutorService executorService = Executors.newCachedThreadPool();
         for (int i = 0; i < taskCount; i++) {
             // 开启三个异步任务
