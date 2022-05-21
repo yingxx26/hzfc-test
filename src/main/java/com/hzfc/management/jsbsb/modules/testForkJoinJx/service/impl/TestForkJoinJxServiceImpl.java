@@ -41,7 +41,7 @@ public class TestForkJoinJxServiceImpl implements TestForkJoinJxService {
         Date DayOfYearDate = DateUtil.localDate2Date(DayOfYear);
         //Map<String, List<TprJxzhzjbd>> wxjZjlistMap = Maps.newHashMapWithExpectedSize(16);
         ArrayList<List<TprJxzhzjbd>> wxjZjlistList = Lists.newArrayListWithExpectedSize(10000);
-        for (int i = 1; i < 1000000; i++) {
+        for (int i = 1; i < 3000000; i++) {
             ArrayList<TprJxzhzjbd> tprJxzhzjbdList = Lists.newArrayListWithExpectedSize(10);
             for (int j = 5; j > 0; j--) {// 10 ，-20 ，30，-40 , 50
                 TprJxzhzjbd tprJxzhzjbd = new TprJxzhzjbd();
