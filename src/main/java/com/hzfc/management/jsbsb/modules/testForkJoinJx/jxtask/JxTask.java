@@ -1,175 +1,91 @@
-package com.hzfc.management.jsbsb.modules.testDuoxianchenJx.service.impl;
+package com.hzfc.management.jsbsb.modules.testForkJoinJx.jxtask;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.hzfc.management.jsbsb.modules.testDuoxianchenJx.constant.JxConstants;
 import com.hzfc.management.jsbsb.modules.testDuoxianchenJx.dto.*;
-import com.hzfc.management.jsbsb.modules.testDuoxianchenJx.service.TestDuoxcService;
-import com.hzfc.management.jsbsb.utils.MyListUtil.MyListUtil;
 import com.hzfc.management.jsbsb.utils.dateUtils.DateUtil;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.RecursiveTask;
 
 /**
- * 后台管理员管理Service实现类
- * Created by hzfc on 2018/4/26.
+ * RecursiveTask 并行计算，同步有返回值
+ * ForkJoin框架处理的任务基本都能使用递归处理，比如求斐波那契数列等，但递归算法的缺陷是：
+ * 一只会只用单线程处理，
+ * 二是递归次数过多时会导致堆栈溢出；
+ * ForkJoin解决了这两个问题，使用多线程并发处理，充分利用计算资源来提高效率，同时避免堆栈溢出发生。
+ * 当然像求斐波那契数列这种小问题直接使用线性算法搞定可能更简单，实际应用中完全没必要使用ForkJoin框架，
+ * 所以ForkJoin是核弹，是用来对付大家伙的，比如超大数组排序。
+ * 最佳应用场景：多核、多内存、可以分割计算再合并的计算密集型任务
  */
-@Service
-public class TestDuoxcServiceImpl implements TestDuoxcService {
+public class JxTask extends RecursiveTask<List<ZhThjxDto>> {
 
-    @Override
-    public void test() {
-        //		代码运行开始时间
-        Long startTime = System.currentTimeMillis();
+    static final int SEQUENTIAL_THRESHOLD = 2;
+    static final long NPS = (1000L * 1000 * 1000);
+    static final boolean extraWork = true; // change to add more than just a sum
 
 
-        TprJxjg tprJxjg = new TprJxjg();
-        tprJxjg.setJxbz(0);
-        tprJxjg.setNd("2022");
-        LocalDate thisDay = LocalDate.now();
-        LocalDate lastyear = thisDay.minusYears(1);
-        LocalDate lastDayOfYear = lastyear.with(TemporalAdjusters.lastDayOfYear());
-        LocalDate lastlastDayOfYear = lastDayOfYear.minusYears(1);
+    /*int low;
+    int high;*/
+    List<List<TprJxzhzjbd>> array;
 
-        Date lastDayOfYearDate = DateUtil.localDate2Date(lastDayOfYear);
-        Date llastlastDayOfYearDate = DateUtil.localDate2Date(lastlastDayOfYear);
-        tprJxjg.setScjxr(lastDayOfYearDate);
-        LocalDate DayOfYear = thisDay.with(TemporalAdjusters.lastDayOfYear());
-        Date DayOfYearDate = DateUtil.localDate2Date(DayOfYear);
-        //Map<String, List<TprJxzhzjbd>> wxjZjlistMap = Maps.newHashMapWithExpectedSize(16);
-        ArrayList<List<TprJxzhzjbd>> wxjZjlistList = Lists.newArrayListWithExpectedSize(10000);
-        for (int i = 1; i < 1000000; i++) {
-            ArrayList<TprJxzhzjbd> tprJxzhzjbdList = Lists.newArrayListWithExpectedSize(10);
-            for (int j = 5; j > 0; j--) {// 10 ，-20 ，30，-40 , 50
-                TprJxzhzjbd tprJxzhzjbd = new TprJxzhzjbd();
-                tprJxzhzjbd.setZhcode(i + "");
-                tprJxzhzjbd.setBdhzhye(new BigDecimal(j * 10 + ""));
-                tprJxzhzjbd.setZhbdlx(j);
-                int xxx = j;
-                if (j % 2 == 0) {
-                    xxx = -j;
-                }
-                tprJxzhzjbd.setBdje(new BigDecimal(xxx + ""));
-                tprJxzhzjbd.setBdsj(DateUtil.localDate2Date(lastDayOfYear.plusMonths(5 - j)));
-                tprJxzhzjbdList.add(tprJxzhzjbd);
-            }
-            TprJxzhzjbd tprJxzhzjbd = new TprJxzhzjbd();
-            tprJxzhzjbd.setZhcode(i + "");
-            tprJxzhzjbd.setBdhzhye(new BigDecimal(100 + ""));
-            tprJxzhzjbd.setZhbdlx(1);
-            int xxx = -3;
-            tprJxzhzjbd.setBdje(new BigDecimal(xxx + ""));
-            tprJxzhzjbd.setBdsj(DateUtil.localDate2Date(lastDayOfYear.plusMonths(6)));
-            tprJxzhzjbdList.add(tprJxzhzjbd);
-            wxjZjlistList.add(tprJxzhzjbdList);
-        }
+    TprJxjg tprJxjg;
+    LocalDate thisDay;
+    LocalDate lastlastDayOfYear;
+    Date lastDayOfYearDate;
+    Date dayOfYearDate;
 
-        List<List<List<TprJxzhzjbd>>> lists = MyListUtil.splitList(wxjZjlistList, 10000);
 
-        m2(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, DayOfYearDate, lists);
-
-        //		代码运行结束时间
-        Long endTime = System.currentTimeMillis();
-//		计算并打印耗时
-        Long tempTime = (endTime - startTime);
-        System.out.println("开支单列表查询花费时间：" +
-                (((tempTime / 86400000) > 0) ? ((tempTime / 86400000) + "d") : "") +
-                ((((tempTime / 86400000) > 0) || ((tempTime % 86400000 / 3600000) > 0)) ? ((tempTime % 86400000 / 3600000) + "h") : ("")) +
-                ((((tempTime / 3600000) > 0) || ((tempTime % 3600000 / 60000) > 0)) ? ((tempTime % 3600000 / 60000) + "m") : ("")) +
-                ((((tempTime / 60000) > 0) || ((tempTime % 60000 / 1000) > 0)) ? ((tempTime % 60000 / 1000) + "s") : ("")) +
-                ((tempTime % 1000) + "ms"));
-
+    public JxTask(List<List<TprJxzhzjbd>> arr, TprJxjg tprJxjgvo, LocalDate thisDayvo, LocalDate lastlastDayOfYearvo, Date lastDayOfYearDatevo, Date dayOfYearDatevo
+    ) {
+        array = arr;
+        tprJxjg = tprJxjgvo;
+        thisDay = thisDayvo;
+        lastlastDayOfYear = lastlastDayOfYearvo;
+        lastDayOfYearDate = lastDayOfYearDatevo;
+        dayOfYearDate = dayOfYearDatevo;
     }
 
-   /* public void m1(TprJxjg tprJxjg, LocalDate thisDay, LocalDate lastlastDayOfYear, Date lastDayOfYearDate, Date dayOfYearDate, List<List<List<TprJxzhzjbd>>> lists) {
-        ExecutorService pool = Executors.newCachedThreadPool();
-        CountDownLatch latch = new CountDownLatch(lists.size());
-        for (List<List<TprJxzhzjbd>> splitwxjZjlistList : lists) {
-            Runnable run = new Runnable() {
-                public void run() {
-                    try {
-                        mainFunction(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, splitwxjZjlistList);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        latch.countDown();
-                    }
-                }
-            };
-            pool.execute(run);
-        }
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("[1] done!");
-        pool.shutdown();
-    }*/
+    /**
+     * fork()方法：将任务放入队列并安排异步执行，一个任务应该只调用一次fork()函数，除非已经执行完毕并重新初始化。
+     * tryUnfork()方法：尝试把任务从队列中拿出单独处理，但不一定成功。
+     * join()方法：等待计算完成并返回计算结果。
+     * isCompletedAbnormally()方法：用于判断任务计算是否发生异常。
+     */
+    public List<ZhThjxDto> compute() {
 
-    public void m2(TprJxjg tprJxjg, LocalDate thisDay, LocalDate lastlastDayOfYear, Date lastDayOfYearDate, Date dayOfYearDate, List<List<List<TprJxzhzjbd>>> lists) {
-        TestFuture testFuture = new TestFuture();
-        // 初始为三个任务数
-        int taskCount = lists.size();
-        List<Future<List<ZhThjxDto>>> futures = new ArrayList<>(taskCount);
-        // CountDownLatch作为递减计数器，一个线程完成了一个任务，计数器减一，减为0时表示任务全部完成
-        CountDownLatch downLatch = new CountDownLatch(taskCount);
+        if (array.size() <= SEQUENTIAL_THRESHOLD) {
+            List<ZhThjxDto> zhThjxDtos = m2(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, array);
+            for (ZhThjxDto zh : zhThjxDtos) {
+                // System.out.println("账号=" + zh.getZhcode());
+            }
+            // System.out.println("=======================");
+            return zhThjxDtos;
+        } else {
+            int mid = array.size() / 2;
+            List<List<TprJxzhzjbd>> listsleft = array.subList(0, mid);
+            List<List<TprJxzhzjbd>> listsright = array.subList(mid, array.size());
 
-        /*ExecutorService executorServiceyxx = new ThreadPoolExecutor
-                (taskCount, 30, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
-        executorServiceyxx.execute();*/
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        for (int i = 0; i < taskCount; i++) {
-            // 开启三个异步任务
-            Future<List<ZhThjxDto>> future = executorService.submit(testFuture.executeTask(i, downLatch, tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, lists.get(i)));
-            futures.add(future);
-        }
-
-        System.out.println("do other things");
-
-        try {
-            // 在downLatch不为0时，主线程会在此阻塞
-            downLatch.await();
-            executorService.shutdown();
-            // 通过future获取结果
-            List<ZhThjxDto> result = testFuture.getFutureResult(futures);
-            System.out.println(result.size());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            JxTask left = new JxTask(listsleft, tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate);
+            JxTask right = new JxTask(listsright, tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate);
+            left.fork();
+            right.fork();
+            List<ZhThjxDto> rightAns = right.join();
+            List<ZhThjxDto> leftAns = left.join();
+            leftAns.addAll(rightAns);
+            return leftAns;
         }
     }
 
-    class TestFuture {
+    public List<ZhThjxDto> m2(TprJxjg tprJxjg, LocalDate thisDay, LocalDate lastlastDayOfYear, Date lastDayOfYearDate, Date dayOfYearDate, List<List<TprJxzhzjbd>> array) {
 
-        public Callable<List<ZhThjxDto>> executeTask(int i, CountDownLatch downLatch, TprJxjg tprJxjg, LocalDate thisDay, LocalDate lastlastDayOfYear, Date lastDayOfYearDate, Date dayOfYearDate, List<List<TprJxzhzjbd>> splitwxjZjlistList) {
-            return () -> {
-                List<ZhThjxDto> zhThjxDtos = mainFunction(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, splitwxjZjlistList);
-                downLatch.countDown();
-                return zhThjxDtos;
-            };
-        }
+        List<ZhThjxDto> zhThjxDtos = mainFunction(tprJxjg, thisDay, lastlastDayOfYear, lastDayOfYearDate, dayOfYearDate, array);
 
-        public List<ZhThjxDto> getFutureResult(List<Future<List<ZhThjxDto>>> futures) {
-            List<ZhThjxDto> result = new ArrayList<>(3);
-            for (Future<List<ZhThjxDto>> future : futures) {
-                if (future.isDone() && !future.isCancelled()) {
-                    try {
-                        result.addAll(future.get());
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return result;
-        }
+        return zhThjxDtos;
+
     }
 
 
@@ -650,6 +566,5 @@ public class TestDuoxcServiceImpl implements TestDuoxcService {
             T .qssj DESC
 
     * */
-
 }
 
