@@ -232,7 +232,19 @@
             <version>0.7.9</version>
             <classifier>jdk8</classifier>
         </dependency>
+        <!--布隆过滤器 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>25.1-jre</version>
+        </dependency>
 
+        <!--Redisson -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>2.7.0</version>
+        </dependency>
     </dependencies>
 
     <build>
