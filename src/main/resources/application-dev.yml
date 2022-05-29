@@ -5,7 +5,11 @@ spring:
     url: jdbc:oracle:thin:@localhost:1521:ORCL
     username: root
     password: 123456
-
+  redis:
+    #    host: 47.102.157.169
+    host: localhost
+    port: 6379
+    timeout: 300000
 
 logging:
   level:
